@@ -16,7 +16,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root{--grønn:#14604b;--krem:#f6f3ea;--gul:#e8a13c;}
-  html,body{height:100%;margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--krem);}
+  html,body{height:100%;margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#fff;}
   body{position:fixed;inset:0;overflow:hidden;width:100%;}
   #map{position:fixed;inset:0;z-index:1;}
   .fane{position:fixed;inset:0;z-index:5;background:var(--krem);overflow:auto;display:none;padding:calc(14px + env(safe-area-inset-top)) 14px calc(84px + env(safe-area-inset-bottom));box-sizing:border-box;}
@@ -72,7 +72,7 @@
   <button id="tab-info" onclick="vis('info')"><span class="ikon">ℹ️</span>Info</button>
 </div>
 <script>
-const VERSJON='2026-07-07.8';
+const VERSJON='2026-07-07.9';
 const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:20,maxNativeZoom:18,attribution:'© Kartverket'});
 const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,maxNativeZoom:19,attribution:'© Esri'});
 const map=L.map('map',{center:[59.1243,10.3235],zoom:16,maxZoom:20,layers:[KART],zoomControl:false});
@@ -88,7 +88,7 @@ let startSatt=false;
 function startUtsnitt(){
   if(startSatt)return;startSatt=true;
   map.invalidateSize();
-  map.setView([59.1245,10.3235],16,{animate:false});
+  map.setView([59.1248,10.3233],17,{animate:false});
 }
 async function hentData(){
   try{
