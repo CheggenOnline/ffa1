@@ -25,7 +25,7 @@
   .tabs button{flex:1;border:none;background:none;padding:11px 0 9px;font-size:12px;font-weight:700;color:#8a938d;cursor:pointer;}
   .tabs button.on{color:var(--grønn);}
   .tabs .ikon{display:block;font-size:22px;margin-bottom:2px;}
-  #sheet{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:30;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.25);max-height:55vh;display:flex;flex-direction:column;transition:transform .25s;}
+  #sheet{position:fixed;left:0;right:0;bottom:var(--tabsH,calc(58px + env(safe-area-inset-bottom)));z-index:30;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.25);max-height:55vh;display:flex;flex-direction:column;transition:transform .25s;}
   #sheet.lukket #sokWrap,#sheet.lukket #dListe{display:none!important;}
   #sheetHode{padding:12px 16px;font-weight:800;font-size:17px;flex:none;cursor:pointer;}
   #sheetHode .strek{width:44px;height:5px;border-radius:3px;background:#ddd;margin:0 auto 8px;}
@@ -46,6 +46,9 @@
   .pRad.ferdig{opacity:.4;}
   .pRad .stedKnapp{border:none;background:#e9f2ee;color:var(--grønn);border-radius:10px;padding:5px 10px;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap;}
   .sub{font-size:13px;color:#7a857f;}
+  .emoji-marker{font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.4);text-align:center;line-height:26px;}
+  .stedTag{background:#e9f2ee;color:var(--grønn);border-radius:10px;padding:4px 9px;font-weight:700;font-size:13px;white-space:nowrap;}
+  .pRad.klikkbar{cursor:pointer;}
 </style>
 </head>
 <body>
@@ -64,7 +67,7 @@
   <button id="tab-info" onclick="vis('info')"><span class="ikon">ℹ️</span>Info</button>
 </div>
 <script>
-const VERSJON='2026-07-07.1';
+const VERSJON='2026-07-07.2';
 const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:19,attribution:'© Kartverket'});
 const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri'});
 const map=L.map('map',{center:[59.1243,10.3235],zoom:16,layers:[KART],zoomControl:false});
@@ -82,11 +85,35 @@ async function hentData(){
     DATA=d;byggMarkører();tegnListe();tegnProgram();tegnInfo();
   }catch(e){}
 }
+function ikonFor(s){
+  if(s.ikon)return s.ikon;
+  const n=s.navn.toLowerCase();
+  if(n.includes('scene'))return '🎤';
+  if(n.includes('matsal')||n.includes('spis'))return '🍽️';
+  if(n.includes('volley')||n.includes('bane'))return '🏐';
+  if(n.includes('peis'))return '🔥';
+  if(n.includes('fest'))return '🎉';
+  if(n.includes('kro'))return '🍻';
+  if(n.includes('pynt')||n.includes('utsikt'))return '🌅';
+  if(n.includes('brygg')||n.includes('båt'))return '⛵';
+  if(n.includes('bad')||n.includes('strand'))return '🏖️';
+  return '📍';
+}
+function popupHtml(i){
+  const s=DATA.steder[i];
+  const d=avstandTil(s);
+  let h='<b>'+ikonFor(s)+' '+esc(s.navn)+'</b>';
+  if(s.besk)h+='<br>'+esc(s.besk);
+  h+=d!=null?'<br><span style="color:#14604b;font-weight:800;">🚶 '+(d<1000?Math.round(d)+' m':(d/1000).toFixed(1)+' km')+' · ca. '+Math.max(1,Math.round(d/66))+' min å gå</span>':'<br><i>Venter på GPS for gangtid…</i>';
+  h+='<br><button style="border:none;background:#14604b;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;margin-top:6px;cursor:pointer;" onclick="visVei('+i+')">🧭 Vis raskeste vei</button>';
+  return h;
+}
 function byggMarkører(){
   markører.forEach(m=>map.removeLayer(m));markører=[];
   DATA.steder.forEach((s,i)=>{
-    const mk=L.marker([s.lat,s.lng]).addTo(map);
-    mk.bindPopup('<b>'+esc(s.navn)+'</b><br><button style="border:none;background:#14604b;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;margin-top:6px;cursor:pointer;" onclick="visVei('+i+')">🧭 Vis vei</button>');
+    const mk=L.marker([s.lat,s.lng],{icon:L.divIcon({html:ikonFor(s),className:'emoji-marker',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(map);
+    mk.bindPopup('');
+    mk.on('popupopen',()=>mk.setPopupContent(popupHtml(i)));
     markører.push(mk);
   });
 }
@@ -99,7 +126,7 @@ function tegnListe(){
   const el=document.getElementById('dListe');
   el.innerHTML=DATA.steder.map((s,i)=>({s,i,d:avstandTil(s)}))
     .filter(x=>!q||x.s.navn.toLowerCase().includes(q))
-    .map(x=>'<div class="dRad" onclick="velg('+x.i+')"><span class="n">'+esc(x.s.navn)+'</span><span class="a">'+(x.d!=null?(x.d<1000?Math.round(x.d)+' m · ~'+Math.max(1,Math.round(x.d/66))+' min':(x.d/1000).toFixed(1)+' km'):'')+'</span></div>').join('')
+    .map(x=>'<div class="dRad" onclick="velg('+x.i+')"><span style="font-size:19px;">'+ikonFor(x.s)+'</span><span class="n">'+esc(x.s.navn)+'</span><span class="a">'+(x.d!=null?(x.d<1000?Math.round(x.d)+' m · ~'+Math.max(1,Math.round(x.d/66))+' min':(x.d/1000).toFixed(1)+' km'):'')+'</span></div>').join('')
     ||'<div class="sub" style="padding:10px;">Ingen treff.</div>';
 }
 function toggleSheet(){document.getElementById('sheet').classList.toggle('lukket');tegnListe();}
@@ -163,7 +190,7 @@ function tegnProgram(){
     h+=(DATA.program[valgtDag]||[]).map(p=>{
       const ferdig=valgtDag<idag||(valgtDag===idag&&(p.slutt||p.t)<nå&&p.t<nå&&((p.slutt&&p.slutt<nå)||(!p.slutt&&p.t<nå&&minuttDiff(p.t,nå)>60)));
       const stedIdx=p.sted?DATA.steder.findIndex(s=>s.navn===p.sted):-1;
-      return '<div class="pRad'+(ferdig?' ferdig':'')+'"><span class="tid">'+p.t+(p.slutt?'–'+p.slutt:'')+'</span><span class="txt">'+esc(p.tekst)+'</span>'+(stedIdx>=0?'<button class="stedKnapp" onclick="velg('+stedIdx+')">🗺 '+esc(p.sted)+'</button>':'')+'</div>';
+      return '<div class="pRad'+(ferdig?' ferdig':'')+(stedIdx>=0?' klikkbar" onclick="velg('+stedIdx+')':'')+'"><span class="tid">'+p.t+(p.slutt?'–'+p.slutt:'')+'</span><span class="txt">'+esc(p.tekst)+'</span>'+(stedIdx>=0?'<span class="stedTag">'+ikonFor(DATA.steder[stedIdx])+' '+esc(p.sted)+' ›</span>':'')+'</div>';
     }).join('')||'<div class="sub">Ingen program denne dagen.</div>';
   }else h+='<div class="sub">Programmet kommer!</div>';
   h+='</div>';
@@ -189,6 +216,8 @@ document.addEventListener('visibilitychange',()=>{
 });
 setInterval(hentData,300000);
 setInterval(()=>{if(document.getElementById('fane-program').style.display==='block')tegnProgram();},60000);
+function settTabsH(){const t=document.querySelector('.tabs');if(t)document.documentElement.style.setProperty('--tabsH',(t.offsetHeight-1)+'px');}
+window.addEventListener('resize',settTabsH);settTabsH();setTimeout(settTabsH,300);
 hentData();
 </script>
 </body>

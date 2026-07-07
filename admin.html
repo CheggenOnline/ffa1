@@ -31,6 +31,7 @@
   #flyttBanner{display:none;position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;right:12px;z-index:1100;background:var(--grønn);color:#fff;border-radius:14px;padding:12px;align-items:center;gap:10px;font-size:14px;font-weight:700;}
   #flyttBanner button{border:none;border-radius:10px;padding:9px 13px;font-weight:800;cursor:pointer;}
   .popKnapp{border:none;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer;background:#e8e5dc;margin:2px;font-size:13px;}
+  .emoji-marker{font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.4);text-align:center;line-height:26px;}
 </style>
 </head>
 <body>
@@ -92,19 +93,21 @@ function melding(t,varig){const el=document.getElementById('status');el.textCont
 function tegnSteder(){
   markørListe.forEach(m=>map.removeLayer(m));markørListe=[];
   D.steder.forEach((s,i)=>{
-    const mk=L.marker([s.lat,s.lng]).addTo(map);
-    mk.bindPopup('<b>'+esc(s.navn)+'</b><br><button class="popKnapp" onclick="startFlytt('+i+')">✥ Flytt</button><button class="popKnapp" onclick="endreNavn('+i+')">✏️ Navn</button><button class="popKnapp" onclick="slettSted('+i+')">🗑 Slett</button>');
+    const mk=L.marker([s.lat,s.lng],{icon:L.divIcon({html:(s.ikon||'📍'),className:'emoji-marker',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(map);
+    mk.bindPopup('<b>'+(s.ikon||'📍')+' '+esc(s.navn)+'</b><br><button class="popKnapp" onclick="startFlytt('+i+')">✥ Flytt</button><button class="popKnapp" onclick="endreNavn('+i+')">✏️ Navn</button><button class="popKnapp" onclick="endreIkon('+i+')">😀 Ikon</button><button class="popKnapp" onclick="slettSted('+i+')">🗑 Slett</button>');
     mk.on('contextmenu',e=>{L.DomEvent.stopPropagation(e);startFlytt(i);});
     markørListe.push(mk);
   });
-  document.getElementById('stedListe').innerHTML=D.steder.map((s,i)=>'<div class="rad" onclick="map.setView(['+s.lat+','+s.lng+'],18)"><span class="n">'+esc(s.navn)+'</span><span class="k">'+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+'</span><button onclick="event.stopPropagation();slettSted('+i+')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen steder.</div>';
+  document.getElementById('stedListe').innerHTML=D.steder.map((s,i)=>'<div class="rad" onclick="map.setView(['+s.lat+','+s.lng+'],18)"><span>'+(s.ikon||'📍')+'</span><span class="n">'+esc(s.navn)+'</span><span class="k">'+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+'</span><button onclick="event.stopPropagation();slettSted('+i+')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen steder.</div>';
 }
 function nyttSted(lat,lng){
   if(flytterIdx!==null)return;
   const n=prompt('Navn på stedet:');if(!n)return;
-  D.steder.push({navn:n.trim(),lat:+lat.toFixed(6),lng:+lng.toFixed(6)});
+  const e=prompt('Emoji-ikon for stedet (valgfritt, f.eks. 🎤):')||'';
+  D.steder.push({navn:n.trim(),lat:+lat.toFixed(6),lng:+lng.toFixed(6),ikon:e.trim()||'📍'});
   lagreLokalt();tegnSteder();
 }
+function endreIkon(i){const e=prompt('Nytt emoji-ikon:',D.steder[i].ikon||'📍');if(e){D.steder[i].ikon=e.trim();lagreLokalt();tegnSteder();map.closePopup();}}
 function slettSted(i){if(confirm('Slette «'+D.steder[i].navn+'»?')){map.closePopup();D.steder.splice(i,1);lagreLokalt();tegnSteder();}}
 function endreNavn(i){const n=prompt('Nytt navn:',D.steder[i].navn);if(n){D.steder[i].navn=n.trim();lagreLokalt();tegnSteder();map.closePopup();}}
 function startFlytt(i){map.closePopup();if(flytterIdx!==null)avsluttFlytt();flytterIdx=i;const mk=markørListe[i];mk.dragging.enable();mk.setOpacity(.6);document.getElementById('flyttBanner').style.display='flex';}
