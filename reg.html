@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>FFA1 – stedsregistrering</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  html,body{height:100%;margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;}
+  #map{position:fixed;inset:0;}
+  #verktøy{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:1000;background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.25);padding:10px;max-height:45vh;overflow:auto;}
+  #verktøy h2{font-size:15px;margin:2px 4px 8px;}
+  .knapp{border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;width:100%;margin-bottom:8px;}
+  .grønn{background:#0e7c5b;color:#fff;}
+  .grå{background:#e8e5dc;color:#222;}
+  .rad{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #eee;font-size:14px;}
+  .rad:last-child{border-bottom:none;}
+  .rad .n{flex:1;font-weight:700;}
+  .rad .k{color:#888;font-size:11px;}
+  .rad button{border:none;background:#eee;border-radius:8px;padding:4px 9px;font-weight:700;cursor:pointer;color:#666;}
+  #eksBoks{display:none;}
+  #eksBoks textarea{width:100%;height:120px;font-size:11px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;}
+  #status{font-size:12px;color:#666;margin:0 4px 8px;}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="verktøy">
+  <h2>📍 FFA1 – registrer steder</h2>
+  <div id="status">Venter på GPS…</div>
+  <button class="knapp grønn" onclick="markerHer()">➕ Marker her (min GPS-posisjon)</button>
+  <div style="font-size:12px;color:#666;margin:-4px 4px 8px;">…eller hold fingeren på kartet for å legge inn et punkt der.</div>
+  <div id="liste"></div>
+  <button class="knapp grå" onclick="visEksport()">📋 Vis eksport (send til Claude)</button>
+  <div id="eksBoks"><textarea id="eksTekst" readonly></textarea>
+  <button class="knapp grå" onclick="kopier()">Kopier til utklippstavle</button></div>
+</div>
+<script>
+const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:19,attribution:'© Kartverket'});
+const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri'});
+const OSM=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'});
+const map=L.map('map',{center:[59.1249,10.3224],zoom:16,layers:[KART]});
+L.control.layers({'Kart (Kartverket)':KART,'Flyfoto':FOTO,'OSM':OSM},null,{position:'topright'}).addTo(map);
+
+let steder=[];try{steder=JSON.parse(localStorage.getItem('ffa1_reg_v1'))||[];}catch(e){}
+const lag=L.layerGroup().addTo(map);
+function lagre(){localStorage.setItem('ffa1_reg_v1',JSON.stringify(steder));}
+function esc(s){return String(s).replace(/</g,'&lt;');}
+function tegn(){
+  lag.clearLayers();
+  steder.forEach((s,i)=>{L.marker([s.lat,s.lng]).addTo(lag).bindPopup('<b>'+esc(s.navn)+'</b><br>'+s.lat+', '+s.lng);});
+  document.getElementById('liste').innerHTML=steder.map((s,i)=>
+    '<div class="rad" onclick="map.setView(['+s.lat+','+s.lng+'],18)"><span class="n">'+esc(s.navn)+'</span><span class="k">'+s.lat+', '+s.lng+'</span><button onclick="event.stopPropagation();slett('+i+')">✕</button></div>').join('')||'<div style="font-size:13px;color:#888;padding:4px;">Ingen steder registrert ennå.</div>';
+  const eb=document.getElementById('eksTekst');if(eb)eb.value=JSON.stringify(steder,null,1);
+}
+function leggTil(lat,lng){
+  const navn=prompt('Navn på stedet (f.eks. Utescenen):');
+  if(!navn)return;
+  steder.push({navn:navn.trim(),lat:+lat.toFixed(6),lng:+lng.toFixed(6)});
+  lagre();tegn();
+}
+function slett(i){if(confirm('Slette «'+steder[i].navn+'»?')){steder.splice(i,1);lagre();tegn();}}
+map.on('contextmenu',e=>leggTil(e.latlng.lat,e.latlng.lng));
+
+let minPos=null,meMark=null,meSirkel=null,første=true;
+function markerHer(){
+  if(!minPos){alert('Har ikke GPS-posisjon ennå – vent litt (og godta stedstilgang).');return;}
+  leggTil(minPos.lat,minPos.lng);
+}
+if(navigator.geolocation){
+  navigator.geolocation.watchPosition(p=>{
+    minPos={lat:p.coords.latitude,lng:p.coords.longitude};
+    document.getElementById('status').textContent='GPS: '+minPos.lat.toFixed(5)+', '+minPos.lng.toFixed(5)+' (±'+Math.round(p.coords.accuracy)+' m)';
+    if(!meMark){
+      meMark=L.circleMarker(minPos,{radius:8,color:'#fff',weight:2,fillColor:'#1a73e8',fillOpacity:1}).addTo(map);
+      meSirkel=L.circle(minPos,{radius:p.coords.accuracy,color:'#1a73e8',weight:1,fillOpacity:.08}).addTo(map);
+    }else{meMark.setLatLng(minPos);meSirkel.setLatLng(minPos);meSirkel.setRadius(p.coords.accuracy);}
+    if(første){første=false;map.setView(minPos,17);}
+  },e=>{document.getElementById('status').textContent='GPS-feil: '+e.message;},{enableHighAccuracy:true,maximumAge:2000});
+}else{document.getElementById('status').textContent='Ingen GPS i denne nettleseren.';}
+
+function visEksport(){const b=document.getElementById('eksBoks');b.style.display=b.style.display==='block'?'none':'block';tegn();}
+function kopier(){
+  const t=document.getElementById('eksTekst');t.select();
+  if(navigator.clipboard)navigator.clipboard.writeText(t.value).then(()=>alert('Kopiert! Lim inn i chatten til Claude.'));
+  else{document.execCommand('copy');alert('Kopiert!');}
+}
+tegn();
+</script>
+</body>
+</html>
