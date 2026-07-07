@@ -1,4 +1,195 @@
 <!DOCTYPE html>
-<html lang="nb"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>FFA1</title>
-<style>body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f6f3ea;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;}</style>
-</head><body><div><h1>🏕️ FFA1</h1><p>Familieleir-appen er under bygging 🚧</p></div></body></html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>FFA1</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="ffa1-apple.png">
+<link rel="icon" type="image/png" sizes="192x192" href="ffa1-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FFA1">
+<meta name="theme-color" content="#14604b">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root{--grønn:#14604b;--krem:#f6f3ea;--gul:#e8a13c;}
+  html,body{height:100%;margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--krem);}
+  #map{position:fixed;inset:0;z-index:1;}
+  .fane{position:fixed;inset:0;z-index:5;background:var(--krem);overflow:auto;display:none;padding:calc(14px + env(safe-area-inset-top)) 14px calc(84px + env(safe-area-inset-bottom));box-sizing:border-box;}
+  h1{font-size:21px;margin:4px 0 12px;color:#1f2d27;}
+  .card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+  .tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;box-shadow:0 -2px 10px rgba(0,0,0,.12);padding-bottom:env(safe-area-inset-bottom);z-index:40;}
+  .tabs button{flex:1;border:none;background:none;padding:11px 0 9px;font-size:12px;font-weight:700;color:#8a938d;cursor:pointer;}
+  .tabs button.on{color:var(--grønn);}
+  .tabs .ikon{display:block;font-size:22px;margin-bottom:2px;}
+  #sheet{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:30;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.25);max-height:55vh;display:flex;flex-direction:column;transition:transform .25s;}
+  #sheet.lukket #sokWrap,#sheet.lukket #dListe{display:none!important;}
+  #sheetHode{padding:12px 16px;font-weight:800;font-size:17px;flex:none;cursor:pointer;}
+  #sheetHode .strek{width:44px;height:5px;border-radius:3px;background:#ddd;margin:0 auto 8px;}
+  #sokWrap{padding:0 12px 8px;flex:none;}
+  #sok{width:100%;font-size:16px;padding:10px 12px;border:1px solid #ddd;border-radius:12px;box-sizing:border-box;}
+  #dListe{overflow:auto;flex:1 1 auto;padding:0 8px 10px;}
+  .dRad{display:flex;align-items:center;gap:8px;padding:11px 8px;border-bottom:1px solid #f0ede4;font-size:15px;cursor:pointer;}
+  .dRad .n{flex:1;font-weight:700;}
+  .dRad .a{color:#888;font-size:12px;white-space:nowrap;}
+  #veiBanner{display:none;position:fixed;top:calc(12px + env(safe-area-inset-top));left:10px;right:10px;z-index:35;background:var(--grønn);color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 4px 14px rgba(0,0,0,.3);font-size:14px;font-weight:700;align-items:center;gap:10px;}
+  #veiBanner button{border:none;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer;background:#fff;color:var(--grønn);}
+  .chip{display:inline-block;border:none;border-radius:20px;padding:8px 14px;font-size:14px;font-weight:700;background:#e9e5da;color:#333;margin:0 6px 8px 0;cursor:pointer;}
+  .chip.on{background:var(--grønn);color:#fff;}
+  .pRad{display:flex;gap:10px;padding:10px 4px;border-bottom:1px solid #f0ede4;font-size:15px;align-items:baseline;}
+  .pRad:last-child{border-bottom:none;}
+  .pRad .tid{font-weight:800;white-space:nowrap;min-width:52px;}
+  .pRad .txt{flex:1;}
+  .pRad.ferdig{opacity:.4;}
+  .pRad .stedKnapp{border:none;background:#e9f2ee;color:var(--grønn);border-radius:10px;padding:5px 10px;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap;}
+  .sub{font-size:13px;color:#7a857f;}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="veiBanner"><span id="veiTekst" style="flex:1;"></span><button onclick="fjernVei()">Fjern</button></div>
+<div id="sheet" class="lukket">
+  <div id="sheetHode" onclick="toggleSheet()"><div class="strek"></div>📍 Destinasjoner</div>
+  <div id="sokWrap"><input id="sok" placeholder="Søk sted…" oninput="tegnListe()"></div>
+  <div id="dListe"></div>
+</div>
+<div class="fane" id="fane-program"></div>
+<div class="fane" id="fane-info"></div>
+<div class="tabs">
+  <button id="tab-kart" class="on" onclick="vis('kart')"><span class="ikon">🗺️</span>Kart</button>
+  <button id="tab-program" onclick="vis('program')"><span class="ikon">📅</span>Program</button>
+  <button id="tab-info" onclick="vis('info')"><span class="ikon">ℹ️</span>Info</button>
+</div>
+<script>
+const VERSJON='2026-07-07.1';
+const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:19,attribution:'© Kartverket'});
+const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri'});
+const map=L.map('map',{center:[59.1243,10.3235],zoom:16,layers:[KART],zoomControl:false});
+L.control.layers({'Kart':KART,'Flyfoto':FOTO},null,{position:'topright'}).addTo(map);
+
+let DATA={steder:[],program:{},info:[]};
+let markører=[],veiLinje=null,veiMål=null,valgtDag=null;
+function esc(s){return String(s).replace(/</g,'&lt;');}
+const iDag=()=>new Date().toLocaleDateString('sv-SE');
+const nåTid=()=>new Date().toTimeString().slice(0,5);
+
+async function hentData(){
+  try{
+    const d=await fetch('data.json?v='+Date.now()).then(r=>r.json());
+    DATA=d;byggMarkører();tegnListe();tegnProgram();tegnInfo();
+  }catch(e){}
+}
+function byggMarkører(){
+  markører.forEach(m=>map.removeLayer(m));markører=[];
+  DATA.steder.forEach((s,i)=>{
+    const mk=L.marker([s.lat,s.lng]).addTo(map);
+    mk.bindPopup('<b>'+esc(s.navn)+'</b><br><button style="border:none;background:#14604b;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;margin-top:6px;cursor:pointer;" onclick="visVei('+i+')">🧭 Vis vei</button>');
+    markører.push(mk);
+  });
+}
+function avstandTil(s){
+  if(!minPos)return null;
+  return map.distance([minPos.lat,minPos.lng],[s.lat,s.lng]);
+}
+function tegnListe(){
+  const q=(document.getElementById('sok').value||'').toLowerCase();
+  const el=document.getElementById('dListe');
+  el.innerHTML=DATA.steder.map((s,i)=>({s,i,d:avstandTil(s)}))
+    .filter(x=>!q||x.s.navn.toLowerCase().includes(q))
+    .map(x=>'<div class="dRad" onclick="velg('+x.i+')"><span class="n">'+esc(x.s.navn)+'</span><span class="a">'+(x.d!=null?(x.d<1000?Math.round(x.d)+' m · ~'+Math.max(1,Math.round(x.d/66))+' min':(x.d/1000).toFixed(1)+' km'):'')+'</span></div>').join('')
+    ||'<div class="sub" style="padding:10px;">Ingen treff.</div>';
+}
+function toggleSheet(){document.getElementById('sheet').classList.toggle('lukket');tegnListe();}
+function velg(i){
+  document.getElementById('sheet').classList.add('lukket');
+  vis('kart');
+  const s=DATA.steder[i];
+  map.setView([s.lat,s.lng],18);
+  markører[i].openPopup();
+}
+function visVei(i){
+  const s=DATA.steder[i];veiMål=i;
+  map.closePopup();
+  if(!minPos){document.getElementById('veiTekst').textContent='Venter på GPS-posisjonen din…';document.getElementById('veiBanner').style.display='flex';return;}
+  tegnVei();
+}
+function tegnVei(){
+  if(veiMål===null||!minPos)return;
+  const s=DATA.steder[veiMål];
+  if(veiLinje)map.removeLayer(veiLinje);
+  veiLinje=L.polyline([[minPos.lat,minPos.lng],[s.lat,s.lng]],{color:'#14604b',weight:4,dashArray:'8 8'}).addTo(map);
+  const d=map.distance([minPos.lat,minPos.lng],[s.lat,s.lng]);
+  document.getElementById('veiTekst').textContent='🧭 '+s.navn+': '+(d<1000?Math.round(d)+' m':(d/1000).toFixed(1)+' km')+' · ~'+Math.max(1,Math.round(d/66))+' min gange';
+  document.getElementById('veiBanner').style.display='flex';
+  map.fitBounds(veiLinje.getBounds(),{padding:[50,80]});
+}
+function fjernVei(){veiMål=null;if(veiLinje){map.removeLayer(veiLinje);veiLinje=null;}document.getElementById('veiBanner').style.display='none';}
+
+let minPos=null,meMark=null,meSirkel=null;
+if(navigator.geolocation){
+  navigator.geolocation.watchPosition(p=>{
+    minPos={lat:p.coords.latitude,lng:p.coords.longitude};
+    if(!meMark){
+      meMark=L.circleMarker(minPos,{radius:8,color:'#fff',weight:2,fillColor:'#1a73e8',fillOpacity:1}).addTo(map);
+      meSirkel=L.circle(minPos,{radius:p.coords.accuracy,color:'#1a73e8',weight:1,fillOpacity:.08}).addTo(map);
+    }else{meMark.setLatLng(minPos);meSirkel.setLatLng(minPos);meSirkel.setRadius(p.coords.accuracy);}
+    if(veiMål!==null)tegnVei();
+  },null,{enableHighAccuracy:true,maximumAge:3000});
+}
+
+function vis(f){
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
+  document.getElementById('tab-'+f).classList.add('on');
+  document.getElementById('fane-program').style.display=f==='program'?'block':'none';
+  document.getElementById('fane-info').style.display=f==='info'?'block':'none';
+  document.getElementById('sheet').style.display=f==='kart'?'flex':'none';
+  if(f==='program')tegnProgram();
+  if(f==='info')tegnInfo();
+}
+function ukedag(d){return ['søndag','mandag','tirsdag','onsdag','torsdag','fredag','lørdag'][new Date(d+'T12:00').getDay()];}
+function tegnProgram(){
+  const dager=Object.keys(DATA.program).sort();
+  const idag=iDag();
+  if(!valgtDag||!DATA.program[valgtDag])valgtDag=DATA.program[idag]?idag:(dager.find(d=>d>=idag)||dager[dager.length-1]);
+  let h='<h1>📅 Program</h1><div>';
+  h+=dager.map(d=>'<button class="chip'+(d===valgtDag?' on':'')+'" onclick="valgtDag=\''+d+'\';tegnProgram()">'+(d===idag?'I dag':ukedag(d)+' '+ +d.slice(8))+'</button>').join('');
+  h+='</div><div class="card">';
+  if(valgtDag){
+    h+='<div class="sub" style="font-weight:700;margin-bottom:4px;">'+ukedag(valgtDag)+' '+ +valgtDag.slice(8)+'. juli</div>';
+    const nå=nåTid();
+    h+=(DATA.program[valgtDag]||[]).map(p=>{
+      const ferdig=valgtDag<idag||(valgtDag===idag&&(p.slutt||p.t)<nå&&p.t<nå&&((p.slutt&&p.slutt<nå)||(!p.slutt&&p.t<nå&&minuttDiff(p.t,nå)>60)));
+      const stedIdx=p.sted?DATA.steder.findIndex(s=>s.navn===p.sted):-1;
+      return '<div class="pRad'+(ferdig?' ferdig':'')+'"><span class="tid">'+p.t+(p.slutt?'–'+p.slutt:'')+'</span><span class="txt">'+esc(p.tekst)+'</span>'+(stedIdx>=0?'<button class="stedKnapp" onclick="velg('+stedIdx+')">🗺 '+esc(p.sted)+'</button>':'')+'</div>';
+    }).join('')||'<div class="sub">Ingen program denne dagen.</div>';
+  }else h+='<div class="sub">Programmet kommer!</div>';
+  h+='</div>';
+  document.getElementById('fane-program').innerHTML=h;
+}
+function minuttDiff(a,b){const m=t=>+t.slice(0,2)*60+ +t.slice(3,5);return m(b)-m(a);}
+function tegnInfo(){
+  let h='<h1>ℹ️ Info</h1>';
+  h+=(DATA.info||[]).slice().reverse().map(x=>'<div class="card"><div style="font-weight:800;margin-bottom:4px;">'+esc(x.tittel)+'</div><div style="font-size:15px;white-space:pre-wrap;">'+esc(x.tekst)+'</div></div>').join('')
+    ||'<div class="card sub">Ingen beskjeder ennå.</div>';
+  h+='<div class="sub" style="text-align:center;margin-top:10px;">FFA1 · Versjon '+VERSJON+'</div>';
+  document.getElementById('fane-info').innerHTML=h;
+}
+
+let ptrY=null;
+document.addEventListener('touchstart',e=>{ptrY=(window.scrollY<=0)?e.touches[0].clientY:null;},{passive:true});
+document.addEventListener('touchmove',e=>{if(ptrY!==null&&e.touches[0].clientY-ptrY>100){ptrY=null;location.reload();}},{passive:true});
+document.addEventListener('touchend',()=>{ptrY=null;},{passive:true});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible')return;
+  if(performance.now()>6*3600*1000){location.reload();return;}
+  hentData();
+});
+setInterval(hentData,300000);
+setInterval(()=>{if(document.getElementById('fane-program').style.display==='block')tegnProgram();},60000);
+hentData();
+</script>
+</body>
+</html>

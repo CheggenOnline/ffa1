@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>FFA1 admin</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root{--grønn:#14604b;}
+  body{margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f6f3ea;padding:calc(10px + env(safe-area-inset-top)) 12px calc(30px + env(safe-area-inset-bottom));}
+  h1{font-size:20px;margin:6px 2px 10px;}
+  h2{font-size:16px;margin:0 0 8px;}
+  .card{background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+  #kartBoks{height:44vh;border-radius:12px;overflow:hidden;margin-bottom:8px;}
+  #map{height:100%;}
+  .knapp{border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;width:100%;margin-top:8px;box-sizing:border-box;}
+  .grønn{background:var(--grønn);color:#fff;}
+  .grå{background:#e8e5dc;color:#222;}
+  .rød{background:#fdeaea;color:#b23;}
+  input,textarea{width:100%;font-size:16px;padding:10px 12px;border:1px solid #ddd;border-radius:12px;box-sizing:border-box;font-family:inherit;margin-top:6px;}
+  textarea{min-height:110px;}
+  label{display:block;font-size:13px;font-weight:700;margin-top:10px;color:#5a655f;}
+  .rad{display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid #f0ede4;font-size:14px;}
+  .rad:last-child{border-bottom:none;}
+  .rad .n{flex:1;font-weight:700;}
+  .rad .k{color:#888;font-size:11px;}
+  .rad button{border:none;background:#eee;border-radius:8px;padding:4px 9px;font-weight:700;cursor:pointer;color:#666;}
+  .sub{font-size:13px;color:#7a857f;}
+  #status{position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;right:12px;z-index:2000;background:#1f2d27;color:#fff;border-radius:12px;padding:12px;font-weight:700;font-size:14px;display:none;}
+  #flyttBanner{display:none;position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;right:12px;z-index:1100;background:var(--grønn);color:#fff;border-radius:14px;padding:12px;align-items:center;gap:10px;font-size:14px;font-weight:700;}
+  #flyttBanner button{border:none;border-radius:10px;padding:9px 13px;font-weight:800;cursor:pointer;}
+  .popKnapp{border:none;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer;background:#e8e5dc;margin:2px;font-size:13px;}
+</style>
+</head>
+<body>
+<div id="status"></div>
+<div id="flyttBanner"><span style="flex:1;">✥ Dra pilen dit den skal</span><button style="background:#fff;color:var(--grønn);" onclick="lagreFlytt()">Lagre</button><button style="background:#ffffff33;color:#fff;" onclick="avsluttFlytt()">Avbryt</button></div>
+<h1>🔧 FFA1 admin</h1>
+
+<div class="card">
+  <h2>🚀 Publisering</h2>
+  <div class="sub">Endringer under lagres først lokalt hos deg. Trykk «Publiser» for å legge dem ut til alle (synlig etter 1–2 min).</div>
+  <label>GitHub-token <span id="tokStatus"></span></label>
+  <input id="tok" type="password" placeholder="Lim inn én gang – lagres på denne enheten" autocomplete="off">
+  <button class="knapp grå" onclick="lagreToken()">Lagre token</button>
+  <button class="knapp grå" onclick="hentPublisert()">⬇️ Hent publiserte data (overskriver lokalt)</button>
+  <button class="knapp grønn" onclick="publiser()">🚀 Publiser alt</button>
+</div>
+
+<div class="card">
+  <h2>📍 Kartsteder</h2>
+  <div id="kartBoks"><div id="map"></div></div>
+  <div class="sub">Hold fingeren på kartet = nytt sted. Trykk pil = meny. Hold pil = flytt.</div>
+  <button class="knapp grønn" onclick="markerHer()">➕ Marker her (min GPS)</button>
+  <div id="stedListe"></div>
+</div>
+
+<div class="card">
+  <h2>📅 Dagsprogram</h2>
+  <label>Dato</label><input id="pDato" type="date">
+  <label>Lim inn programmet (én post per linje: «19:30 Åpningskveld, utescenen»)</label>
+  <textarea id="pTekst" placeholder="15:00  Registrering&#10;18:30–19:15  Flexi kveldsmat&#10;19:30  Åpningskveld, utescenen"></textarea>
+  <div class="sub">Steder gjenkjennes automatisk hvis stedsnavnet nevnes i teksten.</div>
+  <button class="knapp grønn" onclick="leggTilDag()">Legg til / erstatt denne dagen</button>
+  <div id="dagListe"></div>
+</div>
+
+<div class="card">
+  <h2>ℹ️ Info / beskjeder</h2>
+  <label>Tittel</label><input id="iTittel" placeholder="F.eks: Badevakt trengs i morgen">
+  <label>Tekst</label><textarea id="iTekst"></textarea>
+  <button class="knapp grønn" onclick="leggTilInfo()">Legg ut beskjed</button>
+  <div id="infoListe"></div>
+</div>
+
+<script>
+const REPO='CheggenOnline/ffa1', FIL='data.json';
+const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:19,attribution:'© Kartverket'});
+const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri'});
+const map=L.map('map',{center:[59.1243,10.3235],zoom:16,layers:[KART]});
+L.control.layers({'Kart':KART,'Flyfoto':FOTO},null,{position:'topright'}).addTo(map);
+
+let D={steder:[],program:{},info:[]};
+try{const x=JSON.parse(localStorage.getItem('ffa1_admin_v1'));if(x&&x.steder)D=x;}catch(e){}
+let markørListe=[],flytterIdx=null,minPos=null,meMark=null;
+function lagreLokalt(){localStorage.setItem('ffa1_admin_v1',JSON.stringify(D));}
+function esc(s){return String(s).replace(/</g,'&lt;');}
+function melding(t,varig){const el=document.getElementById('status');el.textContent=t;el.style.display='block';clearTimeout(window._st);if(!varig)window._st=setTimeout(()=>el.style.display='none',4000);}
+
+// ---------- Steder ----------
+function tegnSteder(){
+  markørListe.forEach(m=>map.removeLayer(m));markørListe=[];
+  D.steder.forEach((s,i)=>{
+    const mk=L.marker([s.lat,s.lng]).addTo(map);
+    mk.bindPopup('<b>'+esc(s.navn)+'</b><br><button class="popKnapp" onclick="startFlytt('+i+')">✥ Flytt</button><button class="popKnapp" onclick="endreNavn('+i+')">✏️ Navn</button><button class="popKnapp" onclick="slettSted('+i+')">🗑 Slett</button>');
+    mk.on('contextmenu',e=>{L.DomEvent.stopPropagation(e);startFlytt(i);});
+    markørListe.push(mk);
+  });
+  document.getElementById('stedListe').innerHTML=D.steder.map((s,i)=>'<div class="rad" onclick="map.setView(['+s.lat+','+s.lng+'],18)"><span class="n">'+esc(s.navn)+'</span><span class="k">'+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+'</span><button onclick="event.stopPropagation();slettSted('+i+')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen steder.</div>';
+}
+function nyttSted(lat,lng){
+  if(flytterIdx!==null)return;
+  const n=prompt('Navn på stedet:');if(!n)return;
+  D.steder.push({navn:n.trim(),lat:+lat.toFixed(6),lng:+lng.toFixed(6)});
+  lagreLokalt();tegnSteder();
+}
+function slettSted(i){if(confirm('Slette «'+D.steder[i].navn+'»?')){map.closePopup();D.steder.splice(i,1);lagreLokalt();tegnSteder();}}
+function endreNavn(i){const n=prompt('Nytt navn:',D.steder[i].navn);if(n){D.steder[i].navn=n.trim();lagreLokalt();tegnSteder();map.closePopup();}}
+function startFlytt(i){map.closePopup();if(flytterIdx!==null)avsluttFlytt();flytterIdx=i;const mk=markørListe[i];mk.dragging.enable();mk.setOpacity(.6);document.getElementById('flyttBanner').style.display='flex';}
+function lagreFlytt(){if(flytterIdx===null)return;const p=markørListe[flytterIdx].getLatLng();D.steder[flytterIdx].lat=+p.lat.toFixed(6);D.steder[flytterIdx].lng=+p.lng.toFixed(6);lagreLokalt();avsluttFlytt();}
+function avsluttFlytt(){flytterIdx=null;document.getElementById('flyttBanner').style.display='none';tegnSteder();}
+map.on('contextmenu',e=>nyttSted(e.latlng.lat,e.latlng.lng));
+function markerHer(){if(!minPos){alert('Venter på GPS…');return;}nyttSted(minPos.lat,minPos.lng);}
+if(navigator.geolocation)navigator.geolocation.watchPosition(p=>{
+  minPos={lat:p.coords.latitude,lng:p.coords.longitude};
+  if(!meMark)meMark=L.circleMarker(minPos,{radius:7,color:'#fff',weight:2,fillColor:'#1a73e8',fillOpacity:1}).addTo(map);
+  else meMark.setLatLng(minPos);
+},null,{enableHighAccuracy:true,maximumAge:3000});
+
+// ---------- Program ----------
+function parseProgram(txt){
+  const ut=[];
+  txt.split('\n').forEach(l=>{
+    l=l.trim().replace(/\s+/g,' ');
+    const m=l.match(/^(\d{1,2})[:.](\d{2})\s*(?:[–\-—]\s*(\d{1,2})[:.](\d{2}))?\s+(.+)$/);
+    if(!m)return;
+    const t=('0'+m[1]).slice(-2)+':'+m[2];
+    const slutt=m[3]?('0'+m[3]).slice(-2)+':'+m[4]:null;
+    const tekst=m[5].trim();
+    let sted=null;
+    const lt=tekst.toLowerCase();
+    D.steder.forEach(s=>{if(!sted&&lt.includes(s.navn.toLowerCase()))sted=s.navn;});
+    ut.push({t,slutt,tekst,sted});
+  });
+  return ut;
+}
+function leggTilDag(){
+  const dato=document.getElementById('pDato').value;
+  const txt=document.getElementById('pTekst').value;
+  if(!dato){alert('Velg dato 🙂');return;}
+  const poster=parseProgram(txt);
+  if(!poster.length){alert('Fant ingen linjer på formen «19:30 Tekst». Sjekk teksten.');return;}
+  D.program[dato]=poster;
+  lagreLokalt();tegnDager();
+  document.getElementById('pTekst').value='';
+  melding('✅ '+poster.length+' poster lagt inn for '+dato+' ('+poster.filter(p=>p.sted).length+' med sted). Husk å publisere!');
+}
+function slettDag(d){if(confirm('Slette programmet for '+d+'?')){delete D.program[d];lagreLokalt();tegnDager();}}
+function tegnDager(){
+  const dager=Object.keys(D.program).sort();
+  document.getElementById('dagListe').innerHTML=dager.map(d=>'<div class="rad"><span class="n">'+d+'</span><span class="k">'+D.program[d].length+' poster</span><button onclick="redigerDag(\''+d+'\')">✏️</button><button onclick="slettDag(\''+d+'\')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen dager lagt inn.</div>';
+}
+function redigerDag(d){
+  document.getElementById('pDato').value=d;
+  document.getElementById('pTekst').value=D.program[d].map(p=>p.t+(p.slutt?'–'+p.slutt:'')+' '+p.tekst).join('\n');
+  window.scrollTo(0,document.getElementById('pDato').getBoundingClientRect().top+window.scrollY-80);
+}
+
+// ---------- Info ----------
+function leggTilInfo(){
+  const t=document.getElementById('iTittel').value.trim(),x=document.getElementById('iTekst').value.trim();
+  if(!t&&!x){alert('Skriv noe først 🙂');return;}
+  D.info.push({tittel:t||'Beskjed',tekst:x,ts:new Date().toISOString()});
+  document.getElementById('iTittel').value='';document.getElementById('iTekst').value='';
+  lagreLokalt();tegnInfo();melding('✅ Beskjed lagt til. Husk å publisere!');
+}
+function slettInfo(i){if(confirm('Slette beskjeden?')){D.info.splice(i,1);lagreLokalt();tegnInfo();}}
+function tegnInfo(){
+  document.getElementById('infoListe').innerHTML=D.info.map((x,i)=>'<div class="rad"><span class="n">'+esc(x.tittel)+'</span><button onclick="slettInfo('+i+')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen beskjeder.</div>';
+}
+
+// ---------- Publisering ----------
+function token(){return localStorage.getItem('ffa1_admin_token')||'';}
+function lagreToken(){
+  const v=document.getElementById('tok').value.trim();
+  if(!v){alert('Lim inn tokenet først 🙂');return;}
+  localStorage.setItem('ffa1_admin_token',v);
+  document.getElementById('tok').value='';visTokStatus();melding('✅ Token lagret på denne enheten');
+}
+function visTokStatus(){document.getElementById('tokStatus').textContent=token()?'(lagret ✅)':'(mangler)';}
+async function hentPublisert(){
+  try{
+    const d=await fetch('https://cheggenonline.github.io/ffa1/data.json?v='+Date.now()).then(r=>r.json());
+    D=d;lagreLokalt();tegnSteder();tegnDager();tegnInfo();
+    melding('✅ Hentet publiserte data');
+  }catch(e){melding('⚠️ Klarte ikke hente: '+e.message);}
+}
+async function publiser(){
+  if(!token()){alert('Legg inn GitHub-tokenet først (øverst).');return;}
+  melding('🚀 Publiserer…',true);
+  try{
+    D.oppdatert=new Date().toISOString();
+    const hodene={'Authorization':'Bearer '+token(),'Accept':'application/vnd.github+json'};
+    let sha=null;
+    const g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+FIL,{headers:hodene});
+    if(g.ok)sha=(await g.json()).sha;
+    const innhold=btoa(unescape(encodeURIComponent(JSON.stringify(D,null,1))));
+    const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+FIL,{method:'PUT',headers:hodene,
+      body:JSON.stringify({message:'Admin: oppdatert data',content:innhold,sha:sha})});
+    if(r.status===401||r.status===403)throw new Error('Tokenet ble avvist – sjekk at det er riktig');
+    if(!r.ok)throw new Error('GitHub-feil ('+r.status+')');
+    melding('✅ Publisert! Synlig i appen om 1–2 minutter.');
+  }catch(e){melding('⚠️ '+e.message,true);}
+}
+
+visTokStatus();tegnSteder();tegnDager();tegnInfo();
+if(!D.steder.length)hentPublisert();
+</script>
+</body>
+</html>

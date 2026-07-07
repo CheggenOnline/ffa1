@@ -1,0 +1,30 @@
+{
+ "oppdatert": "2026-07-07T09:00:00Z",
+ "steder": [
+  {"navn": "Rødstua", "lat": 59.125578, "lng": 10.322809},
+  {"navn": "Matsalen", "lat": 59.125289, "lng": 10.322664},
+  {"navn": "Festsal", "lat": 59.125884, "lng": 10.32275},
+  {"navn": "Peisestua", "lat": 59.126035, "lng": 10.322793},
+  {"navn": "Østenfor", "lat": 59.124785, "lng": 10.324128},
+  {"navn": "Vestenfor", "lat": 59.124846, "lng": 10.323683},
+  {"navn": "Nordafor", "lat": 59.125014, "lng": 10.324053},
+  {"navn": "Soria Moria", "lat": 59.124565, "lng": 10.323774},
+  {"navn": "Utescenen", "lat": 59.124568, "lng": 10.325314},
+  {"navn": "Sydpynten", "lat": 59.120568, "lng": 10.323077},
+  {"navn": "Volleyball banen", "lat": 59.124125, "lng": 10.324193}
+ ],
+ "program": {
+  "2026-07-06": [
+   {"t": "15:00", "slutt": null, "tekst": "Registrering", "sted": null},
+   {"t": "18:30", "slutt": "19:15", "tekst": "Flexi kveldsmat", "sted": "Matsalen"},
+   {"t": "19:30", "slutt": null, "tekst": "Åpningskveld, utescenen", "sted": "Utescenen"},
+   {"t": "21:00", "slutt": null, "tekst": "Fotball VM i festsalen: Portugal - Spania", "sted": "Festsal"},
+   {"t": "21:30", "slutt": null, "tekst": "Teens møtes på Soria Moria, husk toast", "sted": "Soria Moria"},
+   {"t": "22:00", "slutt": null, "tekst": "Kveldskro for voksne, bli kjent-kveld", "sted": null},
+   {"t": "22:30", "slutt": null, "tekst": "Teens går samlet til Sydpynten", "sted": "Sydpynten"}
+  ]
+ },
+ "info": [
+  {"tittel": "Velkommen til FFA1! 🏕️", "tekst": "Her finner du kart over leirområdet, dagsprogrammet og viktige beskjeder. Legg gjerne appen på Hjem-skjermen: Del-knappen → «Legg til på Hjem-skjerm».", "ts": "2026-07-06T15:00:00Z"}
+ ]
+}
