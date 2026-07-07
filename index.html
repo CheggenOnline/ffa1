@@ -90,7 +90,7 @@ function startUtsnitt(){
   const mla=las[Math.floor(las.length/2)],mln=lns[Math.floor(lns.length/2)];
   const kjerne=DATA.steder.filter(s=>map.distance([s.lat,s.lng],[mla,mln])<450);
   const b=L.latLngBounds(kjerne.map(s=>[s.lat,s.lng]));
-  map.fitBounds(b.pad(0.3),{maxZoom:17});
+  map.fitBounds(b.pad(0.3),{maxZoom:17,animate:false});
 }
 async function hentData(){
   try{
