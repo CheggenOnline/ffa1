@@ -71,10 +71,10 @@
   <button id="tab-info" onclick="vis('info')"><span class="ikon">ℹ️</span>Info</button>
 </div>
 <script>
-const VERSJON='2026-07-07.3';
-const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:19,attribution:'© Kartverket'});
-const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri'});
-const map=L.map('map',{center:[59.1243,10.3235],zoom:16,layers:[KART],zoomControl:false});
+const VERSJON='2026-07-07.4';
+const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:20,maxNativeZoom:18,attribution:'© Kartverket'});
+const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,maxNativeZoom:19,attribution:'© Esri'});
+const map=L.map('map',{center:[59.1243,10.3235],zoom:16,maxZoom:20,layers:[KART],zoomControl:false});
 L.control.layers({'Kart':KART,'Flyfoto':FOTO},null,{position:'topright'}).addTo(map);
 
 let DATA={steder:[],program:{},info:[]};
@@ -117,7 +117,7 @@ function popupHtml(i){
   const s=DATA.steder[i];
   const d=avstandTil(s);
   let h='<b>'+ikonFor(s)+' '+esc(s.navn)+'</b>';
-  if(s.besk)h+='<br>'+esc(s.besk);
+  if(s.besk)h+='<br><span style="font-size:13px;">'+esc(s.besk).replace(/\n/g,'<br>')+'</span>';
   h+=d!=null?'<br><span style="color:#14604b;font-weight:800;">🚶 '+(d<1000?Math.round(d)+' m':(d/1000).toFixed(1)+' km')+' · ca. '+Math.max(1,Math.round(d/66))+' min å gå</span>':'<br><i>Venter på GPS for gangtid…</i>';
   h+='<br><button style="border:none;background:#14604b;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;margin-top:6px;cursor:pointer;" onclick="visVei('+i+')">🧭 Vis raskeste vei</button>';
   return h;
@@ -188,6 +188,7 @@ function vis(f){
   document.getElementById('fane-program').style.display=f==='program'?'block':'none';
   document.getElementById('fane-info').style.display=f==='info'?'block':'none';
   document.getElementById('sheet').style.display=f==='kart'?'flex':'none';
+  document.getElementById('sentrer').style.display=f==='kart'?'block':'none';
   if(f==='program')tegnProgram();
   if(f==='info')tegnInfo();
 }
