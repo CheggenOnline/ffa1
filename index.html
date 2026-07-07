@@ -72,7 +72,7 @@
   <button id="tab-info" onclick="vis('info')"><span class="ikon">ℹ️</span>Info</button>
 </div>
 <script>
-const VERSJON='2026-07-07.7';
+const VERSJON='2026-07-07.8';
 const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:20,maxNativeZoom:18,attribution:'© Kartverket'});
 const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,maxNativeZoom:19,attribution:'© Esri'});
 const map=L.map('map',{center:[59.1243,10.3235],zoom:16,maxZoom:20,layers:[KART],zoomControl:false});
@@ -233,6 +233,11 @@ document.addEventListener('visibilitychange',()=>{
   hentData();
 });
 setInterval(hentData,300000);
+setInterval(async()=>{try{
+  const t=await fetch('index.html?v='+Date.now(),{cache:'no-store'}).then(r=>r.text());
+  const m=t.match(/VERSJON='([^']+)'/);
+  if(m&&m[1]!==VERSJON)location.reload();
+}catch(e){}},600000);
 setInterval(()=>{if(document.getElementById('fane-program').style.display==='block')tegnProgram();},60000);
 function settTabsH(){const t=document.querySelector('.tabs');if(t)document.documentElement.style.setProperty('--tabsH',(t.offsetHeight-1)+'px');}
 window.addEventListener('resize',settTabsH);settTabsH();setTimeout(settTabsH,300);
