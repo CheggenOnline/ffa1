@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-07T09:26:42.916Z",
+ "oppdatert": "2026-07-07T09:30:46.303Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -71,8 +71,13 @@
    "navn": "Kjosk",
    "lat": 59.125325,
    "lng": 10.322256,
-   "ikon": "🍭",
-   "besk": "Åpningstider: hver dag kl. 08:45–09:30, 11:30–12:30 og 15:00–16:00"
+   "ikon": "🍭"
+  },
+  {
+   "navn": "Kveldskro",
+   "lat": 59.126013,
+   "lng": 10.323436,
+   "ikon": "☕️"
   }
  ],
  "program": {
