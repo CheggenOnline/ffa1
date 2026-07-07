@@ -17,7 +17,6 @@
   .knapp{border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;width:100%;margin-top:8px;box-sizing:border-box;}
   .grønn{background:var(--grønn);color:#fff;}
   .grå{background:#e8e5dc;color:#222;}
-  .rød{background:#fdeaea;color:#b23;}
   input,textarea{width:100%;font-size:16px;padding:10px 12px;border:1px solid #ddd;border-radius:12px;box-sizing:border-box;font-family:inherit;margin-top:6px;}
   textarea{min-height:110px;}
   label{display:block;font-size:13px;font-weight:700;margin-top:10px;color:#5a655f;}
@@ -27,27 +26,27 @@
   .rad .k{color:#888;font-size:11px;}
   .rad button{border:none;background:#eee;border-radius:8px;padding:4px 9px;font-weight:700;cursor:pointer;color:#666;}
   .sub{font-size:13px;color:#7a857f;}
-  #status{position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;right:12px;z-index:2000;background:#1f2d27;color:#fff;border-radius:12px;padding:12px;font-weight:700;font-size:14px;display:none;}
+  #status{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;right:12px;z-index:2000;background:#1f2d27;color:#fff;border-radius:12px;padding:12px;font-weight:700;font-size:14px;display:none;}
   #flyttBanner{display:none;position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;right:12px;z-index:1100;background:var(--grønn);color:#fff;border-radius:14px;padding:12px;align-items:center;gap:10px;font-size:14px;font-weight:700;}
   #flyttBanner button{border:none;border-radius:10px;padding:9px 13px;font-weight:800;cursor:pointer;}
   .popKnapp{border:none;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer;background:#e8e5dc;margin:2px;font-size:13px;}
   .emoji-marker{font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.4);text-align:center;line-height:26px;}
+  #lås{position:fixed;inset:0;z-index:3000;background:#f6f3ea;display:flex;align-items:center;justify-content:center;padding:20px;}
+  #lås .boks{background:#fff;border-radius:18px;padding:22px;max-width:340px;width:100%;box-shadow:0 4px 18px rgba(0,0,0,.15);text-align:center;}
 </style>
 </head>
 <body>
+<div id="lås"><div class="boks">
+  <div style="font-size:38px;">🔧</div>
+  <h2 style="margin:8px 0;">FFA1 admin</h2>
+  <input id="pass" type="password" placeholder="Passord" onkeydown="if(event.key==='Enter')låsOpp()">
+  <button class="knapp grønn" onclick="låsOpp()">Logg inn</button>
+  <div class="sub" id="låsFeil" style="margin-top:8px;"></div>
+</div></div>
 <div id="status"></div>
 <div id="flyttBanner"><span style="flex:1;">✥ Dra pilen dit den skal</span><button style="background:#fff;color:var(--grønn);" onclick="lagreFlytt()">Lagre</button><button style="background:#ffffff33;color:#fff;" onclick="avsluttFlytt()">Avbryt</button></div>
-<h1>🔧 FFA1 admin</h1>
-
-<div class="card">
-  <h2>🚀 Publisering</h2>
-  <div class="sub">Endringer under lagres først lokalt hos deg. Trykk «Publiser» for å legge dem ut til alle (synlig etter 1–2 min).</div>
-  <label>GitHub-token <span id="tokStatus"></span></label>
-  <input id="tok" type="password" placeholder="Lim inn én gang – lagres på denne enheten" autocomplete="off">
-  <button class="knapp grå" onclick="lagreToken()">Lagre token</button>
-  <button class="knapp grå" onclick="hentPublisert()">⬇️ Hent publiserte data (overskriver lokalt)</button>
-  <button class="knapp grønn" onclick="publiser()">🚀 Publiser alt</button>
-</div>
+<h1>🔧 FFA1 admin <span class="sub" id="modus"></span></h1>
+<div class="sub" style="margin:-6px 2px 12px;">Alle endringer publiseres automatisk til alle (synlig etter ~1 min).</div>
 
 <div class="card">
   <h2>📍 Kartsteder</h2>
@@ -59,35 +58,100 @@
 
 <div class="card">
   <h2>📅 Dagsprogram</h2>
-  <label>Dato</label><input id="pDato" type="date">
-  <label>Lim inn programmet (én post per linje: «19:30 Åpningskveld, utescenen»)</label>
-  <textarea id="pTekst" placeholder="15:00  Registrering&#10;18:30–19:15  Flexi kveldsmat&#10;19:30  Åpningskveld, utescenen"></textarea>
-  <div class="sub">Steder gjenkjennes automatisk hvis stedsnavnet nevnes i teksten.</div>
-  <button class="knapp grønn" onclick="leggTilDag()">Legg til / erstatt denne dagen</button>
   <div id="dagListe"></div>
+  <label>Dato</label><input id="pDato" type="date">
+  <label>Lim inn programmet for dagen (fritekst)</label>
+  <textarea id="pTekst" placeholder="15:00  Registrering&#10;18:30–19:15  Flexi kveldsmat&#10;19:30  Åpningskveld, utescenen"></textarea>
+  <button class="knapp grønn" id="dagKnapp" onclick="leggTilDag()">Tolk og legg inn dagen</button>
 </div>
 
 <div class="card">
   <h2>ℹ️ Info / beskjeder</h2>
+  <div id="infoListe"></div>
   <label>Tittel</label><input id="iTittel" placeholder="F.eks: Badevakt trengs i morgen">
   <label>Tekst</label><textarea id="iTekst"></textarea>
   <button class="knapp grønn" onclick="leggTilInfo()">Legg ut beskjed</button>
-  <div id="infoListe"></div>
+</div>
+
+<div class="card">
+  <button class="knapp grå" onclick="hentPublisert()">⬇️ Hent publiserte data på nytt</button>
 </div>
 
 <script>
 const REPO='CheggenOnline/ffa1', FIL='data.json';
+// Kryptert konfig {gh, ai} – settes inn når tokens er klare. Tom = manuell modus.
+const KONFIG='';
+let HEMMELIG=null; // {gh, ai} etter innlogging
+
+async function dekrypter(blob,pass){
+  const rå=Uint8Array.from(atob(blob),c=>c.charCodeAt(0));
+  const salt=rå.slice(0,16),iv=rå.slice(16,28),data=rå.slice(28);
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);
+  const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+  const klar=await crypto.subtle.decrypt({name:'AES-GCM',iv},k,data);
+  return JSON.parse(new TextDecoder().decode(klar));
+}
+async function låsOpp(){
+  const pass=document.getElementById('pass').value;
+  if(!pass)return;
+  if(KONFIG){
+    try{HEMMELIG=await dekrypter(KONFIG,pass);}
+    catch(e){document.getElementById('låsFeil').textContent='Feil passord 🙈';return;}
+    document.getElementById('modus').textContent='';
+  }else{
+    // manuell modus inntil kryptert konfig er lagt inn
+    let gh=localStorage.getItem('ffa1_admin_token')||'';
+    if(!gh){gh=prompt('Manuell modus (konfig ikke satt): lim inn GitHub-token:')||'';if(gh)localStorage.setItem('ffa1_admin_token',gh.trim());}
+    HEMMELIG={gh:gh.trim(),ai:localStorage.getItem('ffa1_admin_ai')||''};
+    document.getElementById('modus').textContent='(manuell modus)';
+  }
+  if(!HEMMELIG.gh){document.getElementById('låsFeil').textContent='Mangler GitHub-token.';HEMMELIG=null;return;}
+  document.getElementById('lås').style.display='none';
+  setTimeout(()=>map.invalidateSize(),200);
+  hentPublisert();
+}
+
 const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:19,attribution:'© Kartverket'});
 const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri'});
-const map=L.map('map',{center:[59.1243,10.3235],zoom:16,layers:[KART]});
+const map=L.map('map',{center:[59.1250,10.3232],zoom:16,layers:[KART]});
 L.control.layers({'Kart':KART,'Flyfoto':FOTO},null,{position:'topright'}).addTo(map);
 
 let D={steder:[],program:{},info:[]};
-try{const x=JSON.parse(localStorage.getItem('ffa1_admin_v1'));if(x&&x.steder)D=x;}catch(e){}
 let markørListe=[],flytterIdx=null,minPos=null,meMark=null;
-function lagreLokalt(){localStorage.setItem('ffa1_admin_v1',JSON.stringify(D));}
 function esc(s){return String(s).replace(/</g,'&lt;');}
 function melding(t,varig){const el=document.getElementById('status');el.textContent=t;el.style.display='block';clearTimeout(window._st);if(!varig)window._st=setTimeout(()=>el.style.display='none',4000);}
+
+// ---------- Auto-publisering ----------
+let pubTimer=null,publisererNå=false,ventendePub=false;
+function endret(){planleggPubliser();}
+function planleggPubliser(){clearTimeout(pubTimer);melding('💾 Lagrer…',true);pubTimer=setTimeout(publiser,1500);}
+async function publiser(){
+  if(publisererNå){ventendePub=true;return;}
+  publisererNå=true;
+  try{
+    D.oppdatert=new Date().toISOString();
+    const hodene={'Authorization':'Bearer '+HEMMELIG.gh,'Accept':'application/vnd.github+json'};
+    let sha=null;
+    const g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+FIL,{headers:hodene});
+    if(g.ok)sha=(await g.json()).sha;
+    const innhold=btoa(unescape(encodeURIComponent(JSON.stringify(D,null,1))));
+    const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+FIL,{method:'PUT',headers:hodene,
+      body:JSON.stringify({message:'Admin: oppdatert data',content:innhold,sha:sha})});
+    if(r.status===401||r.status===403)throw new Error('Token avvist – feil passord/konfig?');
+    if(r.status===409){publisererNå=false;return publiser();}
+    if(!r.ok)throw new Error('GitHub-feil ('+r.status+')');
+    melding('✅ Publisert! Synlig hos alle om ~1 min.');
+  }catch(e){melding('⚠️ '+e.message,true);}
+  publisererNå=false;
+  if(ventendePub){ventendePub=false;planleggPubliser();}
+}
+async function hentPublisert(){
+  try{
+    const d=await fetch('https://cheggenonline.github.io/ffa1/data.json?v='+Date.now()).then(r=>r.json());
+    D=d;tegnSteder();tegnDager();tegnInfo();
+    melding('✅ Hentet gjeldende publiserte data');
+  }catch(e){melding('⚠️ Klarte ikke hente: '+e.message);}
+}
 
 // ---------- Steder ----------
 function tegnSteder(){
@@ -103,15 +167,15 @@ function tegnSteder(){
 function nyttSted(lat,lng){
   if(flytterIdx!==null)return;
   const n=prompt('Navn på stedet:');if(!n)return;
-  const e=prompt('Emoji-ikon for stedet (valgfritt, f.eks. 🎤):')||'';
+  const e=prompt('Emoji-ikon (valgfritt, f.eks. 🎤):')||'';
   D.steder.push({navn:n.trim(),lat:+lat.toFixed(6),lng:+lng.toFixed(6),ikon:e.trim()||'📍'});
-  lagreLokalt();tegnSteder();
+  tegnSteder();endret();
 }
-function endreIkon(i){const e=prompt('Nytt emoji-ikon:',D.steder[i].ikon||'📍');if(e){D.steder[i].ikon=e.trim();lagreLokalt();tegnSteder();map.closePopup();}}
-function slettSted(i){if(confirm('Slette «'+D.steder[i].navn+'»?')){map.closePopup();D.steder.splice(i,1);lagreLokalt();tegnSteder();}}
-function endreNavn(i){const n=prompt('Nytt navn:',D.steder[i].navn);if(n){D.steder[i].navn=n.trim();lagreLokalt();tegnSteder();map.closePopup();}}
+function slettSted(i){if(confirm('Slette «'+D.steder[i].navn+'»?')){map.closePopup();D.steder.splice(i,1);tegnSteder();endret();}}
+function endreNavn(i){const n=prompt('Nytt navn:',D.steder[i].navn);if(n){D.steder[i].navn=n.trim();tegnSteder();map.closePopup();endret();}}
+function endreIkon(i){const e=prompt('Nytt emoji-ikon:',D.steder[i].ikon||'📍');if(e){D.steder[i].ikon=e.trim();tegnSteder();map.closePopup();endret();}}
 function startFlytt(i){map.closePopup();if(flytterIdx!==null)avsluttFlytt();flytterIdx=i;const mk=markørListe[i];mk.dragging.enable();mk.setOpacity(.6);document.getElementById('flyttBanner').style.display='flex';}
-function lagreFlytt(){if(flytterIdx===null)return;const p=markørListe[flytterIdx].getLatLng();D.steder[flytterIdx].lat=+p.lat.toFixed(6);D.steder[flytterIdx].lng=+p.lng.toFixed(6);lagreLokalt();avsluttFlytt();}
+function lagreFlytt(){if(flytterIdx===null)return;const p=markørListe[flytterIdx].getLatLng();D.steder[flytterIdx].lat=+p.lat.toFixed(6);D.steder[flytterIdx].lng=+p.lng.toFixed(6);avsluttFlytt();endret();}
 function avsluttFlytt(){flytterIdx=null;document.getElementById('flyttBanner').style.display='none';tegnSteder();}
 map.on('contextmenu',e=>nyttSted(e.latlng.lat,e.latlng.lng));
 function markerHer(){if(!minPos){alert('Venter på GPS…');return;}nyttSted(minPos.lat,minPos.lng);}
@@ -122,7 +186,7 @@ if(navigator.geolocation)navigator.geolocation.watchPosition(p=>{
 },null,{enableHighAccuracy:true,maximumAge:3000});
 
 // ---------- Program ----------
-function parseProgram(txt){
+function regexParse(txt){
   const ut=[];
   txt.split('\n').forEach(l=>{
     l=l.trim().replace(/\s+/g,' ');
@@ -131,33 +195,55 @@ function parseProgram(txt){
     const t=('0'+m[1]).slice(-2)+':'+m[2];
     const slutt=m[3]?('0'+m[3]).slice(-2)+':'+m[4]:null;
     const tekst=m[5].trim();
-    let sted=null;
-    const lt=tekst.toLowerCase();
+    let sted=null;const lt=tekst.toLowerCase();
     D.steder.forEach(s=>{if(!sted&&lt.includes(s.navn.toLowerCase()))sted=s.navn;});
     ut.push({t,slutt,tekst,sted});
   });
   return ut;
 }
-function leggTilDag(){
+async function claudeParse(txt){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{
+    'x-api-key':HEMMELIG.ai,'anthropic-version':'2023-06-01','content-type':'application/json',
+    'anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,
+      system:'Du tolker dagsprogram for en norsk familieleir til strukturert JSON. Kjente steder på leiren: '+D.steder.map(s=>s.navn).join(', ')+'. Regler: én post per programpunkt; "t"=starttid HH:MM; "slutt"=sluttid HH:MM eller null; "tekst"=programteksten (uten tidene, ellers ordrett); "sted"=EKSAKT ett av de kjente stedsnavnene hvis posten tydelig hører til der (nevnt i teksten, evt. i bøyd form), ellers null. Ignorer overskrifter og tomme linjer. Svar KUN med gyldig JSON: {"poster":[{"t":"..","slutt":..,"tekst":"..","sted":..}]}',
+      messages:[{role:'user',content:txt}]})});
+  if(!res.ok)throw new Error('Claude-feil ('+res.status+')');
+  const data=await res.json();
+  let s=(data.content&&data.content[0]&&data.content[0].text)||'';
+  s=s.replace(/```json|```/g,'').trim();
+  const m=s.match(/\{[\s\S]*\}/);if(!m)throw new Error('Uventet svar fra Claude');
+  const poster=(JSON.parse(m[0]).poster||[]).filter(p=>p&&/^\d\d:\d\d$/.test(p.t)&&p.tekst);
+  poster.forEach(p=>{if(p.sted&&!D.steder.some(s2=>s2.navn===p.sted))p.sted=null;if(p.slutt&&!/^\d\d:\d\d$/.test(p.slutt))p.slutt=null;});
+  return poster;
+}
+async function leggTilDag(){
   const dato=document.getElementById('pDato').value;
   const txt=document.getElementById('pTekst').value;
   if(!dato){alert('Velg dato 🙂');return;}
-  const poster=parseProgram(txt);
-  if(!poster.length){alert('Fant ingen linjer på formen «19:30 Tekst». Sjekk teksten.');return;}
+  if(!txt.trim()){alert('Lim inn programmet først 🙂');return;}
+  const kn=document.getElementById('dagKnapp');kn.disabled=true;kn.textContent='🤔 Tolker…';
+  let poster=[];
+  try{
+    if(HEMMELIG.ai){try{poster=await claudeParse(txt);}catch(e){poster=regexParse(txt);}}
+    else poster=regexParse(txt);
+  }finally{kn.disabled=false;kn.textContent='Tolk og legg inn dagen';}
+  if(!poster.length){alert('Fant ingen programposter – sjekk teksten.');return;}
+  poster.sort((a,b)=>a.t<b.t?-1:1);
   D.program[dato]=poster;
-  lagreLokalt();tegnDager();
+  tegnDager();
   document.getElementById('pTekst').value='';
-  melding('✅ '+poster.length+' poster lagt inn for '+dato+' ('+poster.filter(p=>p.sted).length+' med sted). Husk å publisere!');
+  melding('✅ '+poster.length+' poster for '+dato+' ('+poster.filter(p=>p.sted).length+' med sted)');
+  endret();
 }
-function slettDag(d){if(confirm('Slette programmet for '+d+'?')){delete D.program[d];lagreLokalt();tegnDager();}}
+function slettDag(d){if(confirm('Slette programmet for '+d+'?')){delete D.program[d];tegnDager();endret();}}
 function tegnDager(){
   const dager=Object.keys(D.program).sort();
-  document.getElementById('dagListe').innerHTML=dager.map(d=>'<div class="rad"><span class="n">'+d+'</span><span class="k">'+D.program[d].length+' poster</span><button onclick="redigerDag(\''+d+'\')">✏️</button><button onclick="slettDag(\''+d+'\')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen dager lagt inn.</div>';
+  document.getElementById('dagListe').innerHTML=dager.map(d=>'<div class="rad"><span class="n">'+d+'</span><span class="k">'+D.program[d].length+' poster</span><button onclick="redigerDag(\''+d+'\')">✏️</button><button onclick="slettDag(\''+d+'\')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen dager lagt inn ennå.</div>';
 }
 function redigerDag(d){
   document.getElementById('pDato').value=d;
   document.getElementById('pTekst').value=D.program[d].map(p=>p.t+(p.slutt?'–'+p.slutt:'')+' '+p.tekst).join('\n');
-  window.scrollTo(0,document.getElementById('pDato').getBoundingClientRect().top+window.scrollY-80);
 }
 
 // ---------- Info ----------
@@ -166,49 +252,13 @@ function leggTilInfo(){
   if(!t&&!x){alert('Skriv noe først 🙂');return;}
   D.info.push({tittel:t||'Beskjed',tekst:x,ts:new Date().toISOString()});
   document.getElementById('iTittel').value='';document.getElementById('iTekst').value='';
-  lagreLokalt();tegnInfo();melding('✅ Beskjed lagt til. Husk å publisere!');
+  tegnInfo();endret();
 }
-function slettInfo(i){if(confirm('Slette beskjeden?')){D.info.splice(i,1);lagreLokalt();tegnInfo();}}
+function slettInfo(i){if(confirm('Slette beskjeden?')){D.info.splice(i,1);tegnInfo();endret();}}
 function tegnInfo(){
   document.getElementById('infoListe').innerHTML=D.info.map((x,i)=>'<div class="rad"><span class="n">'+esc(x.tittel)+'</span><button onclick="slettInfo('+i+')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen beskjeder.</div>';
 }
-
-// ---------- Publisering ----------
-function token(){return localStorage.getItem('ffa1_admin_token')||'';}
-function lagreToken(){
-  const v=document.getElementById('tok').value.trim();
-  if(!v){alert('Lim inn tokenet først 🙂');return;}
-  localStorage.setItem('ffa1_admin_token',v);
-  document.getElementById('tok').value='';visTokStatus();melding('✅ Token lagret på denne enheten');
-}
-function visTokStatus(){document.getElementById('tokStatus').textContent=token()?'(lagret ✅)':'(mangler)';}
-async function hentPublisert(){
-  try{
-    const d=await fetch('https://cheggenonline.github.io/ffa1/data.json?v='+Date.now()).then(r=>r.json());
-    D=d;lagreLokalt();tegnSteder();tegnDager();tegnInfo();
-    melding('✅ Hentet publiserte data');
-  }catch(e){melding('⚠️ Klarte ikke hente: '+e.message);}
-}
-async function publiser(){
-  if(!token()){alert('Legg inn GitHub-tokenet først (øverst).');return;}
-  melding('🚀 Publiserer…',true);
-  try{
-    D.oppdatert=new Date().toISOString();
-    const hodene={'Authorization':'Bearer '+token(),'Accept':'application/vnd.github+json'};
-    let sha=null;
-    const g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+FIL,{headers:hodene});
-    if(g.ok)sha=(await g.json()).sha;
-    const innhold=btoa(unescape(encodeURIComponent(JSON.stringify(D,null,1))));
-    const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+FIL,{method:'PUT',headers:hodene,
-      body:JSON.stringify({message:'Admin: oppdatert data',content:innhold,sha:sha})});
-    if(r.status===401||r.status===403)throw new Error('Tokenet ble avvist – sjekk at det er riktig');
-    if(!r.ok)throw new Error('GitHub-feil ('+r.status+')');
-    melding('✅ Publisert! Synlig i appen om 1–2 minutter.');
-  }catch(e){melding('⚠️ '+e.message,true);}
-}
-
-visTokStatus();tegnSteder();tegnDager();tegnInfo();
-if(!D.steder.length)hentPublisert();
+tegnSteder();tegnDager();tegnInfo();
 </script>
 </body>
 </html>

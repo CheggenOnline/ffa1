@@ -17,6 +17,7 @@
 <style>
   :root{--grønn:#14604b;--krem:#f6f3ea;--gul:#e8a13c;}
   html,body{height:100%;margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--krem);}
+  body{position:fixed;inset:0;overflow:hidden;width:100%;}
   #map{position:fixed;inset:0;z-index:1;}
   .fane{position:fixed;inset:0;z-index:5;background:var(--krem);overflow:auto;display:none;padding:calc(14px + env(safe-area-inset-top)) 14px calc(84px + env(safe-area-inset-bottom));box-sizing:border-box;}
   h1{font-size:21px;margin:4px 0 12px;color:#1f2d27;}
@@ -46,6 +47,8 @@
   .pRad.ferdig{opacity:.4;}
   .pRad .stedKnapp{border:none;background:#e9f2ee;color:var(--grønn);border-radius:10px;padding:5px 10px;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap;}
   .sub{font-size:13px;color:#7a857f;}
+  #sentrer{position:fixed;top:calc(70px + env(safe-area-inset-top));right:10px;z-index:20;width:42px;height:42px;border:none;border-radius:50%;background:#1a73e8;color:#fff;font-size:18px;line-height:42px;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:pointer;}
+  #adminLenke{position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;border:none;background:none;font-size:20px;opacity:.35;cursor:pointer;}
   .emoji-marker{font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.4);text-align:center;line-height:26px;}
   .stedTag{background:#e9f2ee;color:var(--grønn);border-radius:10px;padding:4px 9px;font-weight:700;font-size:13px;white-space:nowrap;}
   .pRad.klikkbar{cursor:pointer;}
@@ -53,6 +56,7 @@
 </head>
 <body>
 <div id="map"></div>
+<button id="sentrer" onclick="sentrer()" title="Vis min posisjon"><span style="display:inline-block;transform:rotate(-45deg);">➤</span></button>
 <div id="veiBanner"><span id="veiTekst" style="flex:1;"></span><button onclick="fjernVei()">Fjern</button></div>
 <div id="sheet" class="lukket">
   <div id="sheetHode" onclick="toggleSheet()"><div class="strek"></div>📍 Destinasjoner</div>
@@ -67,7 +71,7 @@
   <button id="tab-info" onclick="vis('info')"><span class="ikon">ℹ️</span>Info</button>
 </div>
 <script>
-const VERSJON='2026-07-07.2';
+const VERSJON='2026-07-07.3';
 const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:19,attribution:'© Kartverket'});
 const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri'});
 const map=L.map('map',{center:[59.1243,10.3235],zoom:16,layers:[KART],zoomControl:false});
@@ -79,12 +83,22 @@ function esc(s){return String(s).replace(/</g,'&lt;');}
 const iDag=()=>new Date().toLocaleDateString('sv-SE');
 const nåTid=()=>new Date().toTimeString().slice(0,5);
 
+let startSatt=false;
+function startUtsnitt(){
+  if(startSatt||!DATA.steder.length)return;startSatt=true;
+  const las=DATA.steder.map(s=>s.lat).sort((a,b)=>a-b),lns=DATA.steder.map(s=>s.lng).sort((a,b)=>a-b);
+  const mla=las[Math.floor(las.length/2)],mln=lns[Math.floor(lns.length/2)];
+  const kjerne=DATA.steder.filter(s=>map.distance([s.lat,s.lng],[mla,mln])<450);
+  const b=L.latLngBounds(kjerne.map(s=>[s.lat,s.lng]));
+  map.fitBounds(b.pad(0.3),{maxZoom:17});
+}
 async function hentData(){
   try{
     const d=await fetch('data.json?v='+Date.now()).then(r=>r.json());
-    DATA=d;byggMarkører();tegnListe();tegnProgram();tegnInfo();
+    DATA=d;byggMarkører();tegnListe();tegnProgram();tegnInfo();startUtsnitt();
   }catch(e){}
 }
+function sentrer(){if(minPos)map.setView([minPos.lat,minPos.lng],17);}
 function ikonFor(s){
   if(s.ikon)return s.ikon;
   const n=s.navn.toLowerCase();
@@ -168,6 +182,7 @@ if(navigator.geolocation){
 }
 
 function vis(f){
+  try{sessionStorage.setItem('ffa1_fane',f);}catch(e){}
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
   document.getElementById('tab-'+f).classList.add('on');
   document.getElementById('fane-program').style.display=f==='program'?'block':'none';
@@ -202,11 +217,15 @@ function tegnInfo(){
   h+=(DATA.info||[]).slice().reverse().map(x=>'<div class="card"><div style="font-weight:800;margin-bottom:4px;">'+esc(x.tittel)+'</div><div style="font-size:15px;white-space:pre-wrap;">'+esc(x.tekst)+'</div></div>').join('')
     ||'<div class="card sub">Ingen beskjeder ennå.</div>';
   h+='<div class="sub" style="text-align:center;margin-top:10px;">FFA1 · Versjon '+VERSJON+'</div>';
+  h='<button id="adminLenke" onclick="location.href=\'admin.html\'">🔧</button>'+h;
   document.getElementById('fane-info').innerHTML=h;
 }
 
 let ptrY=null;
-document.addEventListener('touchstart',e=>{ptrY=(window.scrollY<=0)?e.touches[0].clientY:null;},{passive:true});
+document.addEventListener('touchstart',e=>{
+  const f=e.target.closest('.fane');
+  ptrY=((f?f.scrollTop:window.scrollY)<=0)?e.touches[0].clientY:null;
+},{passive:true});
 document.addEventListener('touchmove',e=>{if(ptrY!==null&&e.touches[0].clientY-ptrY>100){ptrY=null;location.reload();}},{passive:true});
 document.addEventListener('touchend',()=>{ptrY=null;},{passive:true});
 document.addEventListener('visibilitychange',()=>{
@@ -218,6 +237,7 @@ setInterval(hentData,300000);
 setInterval(()=>{if(document.getElementById('fane-program').style.display==='block')tegnProgram();},60000);
 function settTabsH(){const t=document.querySelector('.tabs');if(t)document.documentElement.style.setProperty('--tabsH',(t.offsetHeight-1)+'px');}
 window.addEventListener('resize',settTabsH);settTabsH();setTimeout(settTabsH,300);
+try{const husk=sessionStorage.getItem('ffa1_fane');if(husk&&husk!=='kart')vis(husk);}catch(e){}
 hentData();
 </script>
 </body>
