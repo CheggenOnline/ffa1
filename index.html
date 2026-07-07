@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FFA1">
-<meta name="theme-color" content="#14604b">
+<meta name="theme-color" content="#ffffff">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -71,7 +71,7 @@
   <button id="tab-info" onclick="vis('info')"><span class="ikon">ℹ️</span>Info</button>
 </div>
 <script>
-const VERSJON='2026-07-07.4';
+const VERSJON='2026-07-07.5';
 const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:20,maxNativeZoom:18,attribution:'© Kartverket'});
 const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,maxNativeZoom:19,attribution:'© Esri'});
 const map=L.map('map',{center:[59.1243,10.3235],zoom:16,maxZoom:20,layers:[KART],zoomControl:false});
@@ -85,12 +85,8 @@ const nåTid=()=>new Date().toTimeString().slice(0,5);
 
 let startSatt=false;
 function startUtsnitt(){
-  if(startSatt||!DATA.steder.length)return;startSatt=true;
-  const las=DATA.steder.map(s=>s.lat).sort((a,b)=>a-b),lns=DATA.steder.map(s=>s.lng).sort((a,b)=>a-b);
-  const mla=las[Math.floor(las.length/2)],mln=lns[Math.floor(lns.length/2)];
-  const kjerne=DATA.steder.filter(s=>map.distance([s.lat,s.lng],[mla,mln])<450);
-  const b=L.latLngBounds(kjerne.map(s=>[s.lat,s.lng]));
-  map.fitBounds(b.pad(0.3),{maxZoom:17,animate:false});
+  if(startSatt)return;startSatt=true;
+  map.fitBounds([[59.1218,10.3170],[59.1270,10.3292]],{maxZoom:17,animate:false});
 }
 async function hentData(){
   try{
