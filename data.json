@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-07T09:05:42.697Z",
+ "oppdatert": "2026-07-07T09:24:51.556Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -110,6 +110,140 @@
     "t": "22:30",
     "slutt": null,
     "tekst": "Teens går samlet til Sydpynten",
+    "sted": "Sydpynten"
+   }
+  ],
+  "2026-07-07": [
+   {
+    "t": "08:00",
+    "slutt": null,
+    "tekst": "Morgenbad",
+    "sted": null
+   },
+   {
+    "t": "09:00",
+    "slutt": "09:45",
+    "tekst": "Flexifrokost",
+    "sted": null
+   },
+   {
+    "t": "09:45",
+    "slutt": null,
+    "tekst": "Morgensamling for alle, med informasjon for dagen.",
+    "sted": "Utescenen"
+   },
+   {
+    "t": "10:00",
+    "slutt": null,
+    "tekst": "Bibeltimer: Småbarn – Rødstua, 1.–4. klasse – Peisestua, Tweens – Svenner Fyr / Vestre Sjøbod, Teens – Festsalen, Videregående – Færder Fyr / Østre Sjøbod",
+    "sted": null
+   },
+   {
+    "t": "10:15",
+    "slutt": null,
+    "tekst": "Bibeltime for voksne – Kapellet",
+    "sted": null
+   },
+   {
+    "t": "12:00",
+    "slutt": null,
+    "tekst": "Familie- og aktivitetstid",
+    "sted": null
+   },
+   {
+    "t": "12:00",
+    "slutt": null,
+    "tekst": "Husmesterskap (oppmøte på plassen foran Soria Moria)",
+    "sted": "Soria Moria"
+   },
+   {
+    "t": "14:00",
+    "slutt": null,
+    "tekst": "Middag (kjøttkaker)",
+    "sted": null
+   },
+   {
+    "t": "15:00",
+    "slutt": null,
+    "tekst": "Flåtebygging for tweens og teens ved kajakkene",
+    "sted": null
+   },
+   {
+    "t": "15:00",
+    "slutt": null,
+    "tekst": "Forming i Rødstua",
+    "sted": "Rødstua"
+   },
+   {
+    "t": "15:00",
+    "slutt": null,
+    "tekst": "Frisbeegolfrunde (oppmøte utenfor matsal)",
+    "sted": "Matsalen"
+   },
+   {
+    "t": "18:00",
+    "slutt": null,
+    "tekst": "Fotball-VM: Argentina – Egypt",
+    "sted": null
+   },
+   {
+    "t": "18:25",
+    "slutt": null,
+    "tekst": "Innlevering av dagens knatt (ute foran Rødstua)",
+    "sted": "Rødstua"
+   },
+   {
+    "t": "18:30",
+    "slutt": "19:15",
+    "tekst": "Flexi kveldsmat",
+    "sted": null
+   },
+   {
+    "t": "19:30",
+    "slutt": null,
+    "tekst": "Aktivitet for tweens (oppmøte ved fotballbanen)",
+    "sted": null
+   },
+   {
+    "t": "19:30",
+    "slutt": null,
+    "tekst": "Volleyball for voksne / teens",
+    "sted": "Volleyball banen"
+   },
+   {
+    "t": "21:00",
+    "slutt": null,
+    "tekst": "Planlegging for teens til tweens på Soria Moria",
+    "sted": "Soria Moria"
+   },
+   {
+    "t": "21:45",
+    "slutt": null,
+    "tekst": "Kveldstanker i kapellet",
+    "sted": null
+   },
+   {
+    "t": "22:00",
+    "slutt": null,
+    "tekst": "Kveldskro for voksne",
+    "sted": null
+   },
+   {
+    "t": "22:00",
+    "slutt": null,
+    "tekst": "Fotball-VM: Sveits – Colombia",
+    "sted": null
+   },
+   {
+    "t": "22:00",
+    "slutt": null,
+    "tekst": "Teens møtes på Soria Moria (husk toast)",
+    "sted": "Soria Moria"
+   },
+   {
+    "t": "22:30",
+    "slutt": null,
+    "tekst": "Teens Sydpynten (oppmøte utenfor kapellet)",
     "sted": "Sydpynten"
    }
   ]
