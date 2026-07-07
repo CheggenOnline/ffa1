@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-07T09:49:37.005Z",
+ "oppdatert": "2026-07-07T10:29:26.127Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -272,11 +272,6 @@
    "tittel": "Velkommen til FFA1! 🏕️",
    "tekst": "Her finner du kart over leirområdet, dagsprogrammet og viktige beskjeder. Legg gjerne appen på Hjem-skjermen: Del-knappen → «Legg til på Hjem-skjerm».",
    "ts": "2026-07-06T15:00:00Z"
-  },
-  {
-   "tittel": "Test",
-   "tekst": "Beskjed",
-   "ts": "2026-07-07T09:25:08.895Z"
   }
  ]
 }
