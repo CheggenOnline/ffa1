@@ -63,6 +63,12 @@
   <label>Lim inn programmet for dagen (fritekst)</label>
   <textarea id="pTekst" placeholder="15:00  Registrering&#10;18:30–19:15  Flexi kveldsmat&#10;19:30  Åpningskveld, utescenen"></textarea>
   <button class="knapp grønn" id="dagKnapp" onclick="leggTilDag()">Tolk og legg inn dagen</button>
+  <div style="display:flex;gap:8px;">
+    <button class="knapp grå" style="flex:1;" onclick="document.getElementById('progKam').click()">📷 Ta bilde av programmet</button>
+    <button class="knapp grå" style="flex:1;" onclick="document.getElementById('progFil').click()">📁 Last opp bilde</button>
+  </div>
+  <input id="progKam" type="file" accept="image/*" capture="environment" style="display:none" onchange="tolkProgramBilde(this)">
+  <input id="progFil" type="file" accept="image/*" style="display:none" onchange="tolkProgramBilde(this)">
 </div>
 
 <div class="card">
@@ -217,6 +223,46 @@ async function claudeParse(txt){
   const poster=(JSON.parse(m[0]).poster||[]).filter(p=>p&&/^\d\d:\d\d$/.test(p.t)&&p.tekst);
   poster.forEach(p=>{if(p.sted&&!D.steder.some(s2=>s2.navn===p.sted))p.sted=null;if(p.slutt&&!/^\d\d:\d\d$/.test(p.slutt))p.slutt=null;});
   return poster;
+}
+function skalerBilde(f){return new Promise((ok,feil)=>{
+  const img=new Image();
+  img.onload=()=>{const maks=1568,sk=Math.min(1,maks/Math.max(img.width,img.height));
+    const c=document.createElement('canvas');c.width=Math.round(img.width*sk);c.height=Math.round(img.height*sk);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    const b64=c.toDataURL('image/jpeg',0.85).split(',')[1];
+    URL.revokeObjectURL(img.src);ok(b64);};
+  img.onerror=()=>feil(new Error('Klarte ikke lese bildet'));
+  img.src=URL.createObjectURL(f);});}
+async function tolkProgramBilde(inp){
+  const f=inp.files[0];inp.value='';if(!f)return;
+  melding('🤖 Tolker programmet fra bildet…',true);
+  try{
+    const b64=await skalerBilde(f);
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{
+      'x-api-key':HEMMELIG.ai,'anthropic-version':'2023-06-01','content-type':'application/json',
+      'anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,
+        system:'Du tolker et fotografert/skannet dagsprogram for en norsk familieleir til strukturert JSON. Kjente steder på leiren: '+D.steder.map(s=>s.navn).join(', ')+'. Regler: les ALLE programpunktene i bildet; "t"=starttid HH:MM; "slutt"=sluttid HH:MM eller null; "tekst"=programteksten (uten tidene, ellers ordrett); "sted"=EKSAKT ett av de kjente stedsnavnene hvis posten tydelig hører til der (nevnt i teksten, evt. bøyd form), ellers null; "dato"=datoen som står i programmet som "YYYY-MM-DD" (anta år 2026), eller null hvis ingen dato synes. Svar KUN med gyldig JSON: {"dato":..,"poster":[{"t":"..","slutt":..,"tekst":"..","sted":..}]}',
+        messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Tolk dette dagsprogrammet.'}]}]})});
+    if(res.status===401||res.status===403)throw new Error('Nøkkel avvist – logg inn på nytt');
+    if(!res.ok)throw new Error('Claude-feil ('+res.status+')');
+    const data=await res.json();
+    let txt=((data.content&&data.content[0]&&data.content[0].text)||'').replace(/```json|```/g,'').trim();
+    const m=txt.match(/\{[\s\S]*\}/);if(!m)throw new Error('Uventet svar fra Claude');
+    const obj=JSON.parse(m[0]);
+    const poster=(obj.poster||[]).filter(x=>x&&/^\d\d:\d\d$/.test(x.t)&&x.tekst);
+    poster.forEach(x=>{if(x.sted&&!D.steder.some(s2=>s2.navn===x.sted))x.sted=null;if(x.slutt&&!/^\d\d:\d\d$/.test(x.slutt))x.slutt=null;});
+    if(!poster.length)throw new Error('Fant ingen programposter i bildet – prøv et skarpere bilde');
+    let dato=document.getElementById('pDato').value||(/^\d{4}-\d{2}-\d{2}$/.test(obj.dato||'')?obj.dato:'');
+    if(!dato){melding('⚠️ Fant ingen dato – velg dato øverst og prøv igjen',true);return;}
+    poster.sort((a,b)=>a.t<b.t?-1:1);
+    D.program[dato]=poster;
+    document.getElementById('pDato').value=dato;
+    document.getElementById('pTekst').value=poster.map(x=>x.t+(x.slutt?'–'+x.slutt:'')+' '+x.tekst).join('\n');
+    tegnDager();
+    melding('✅ '+poster.length+' poster tolket fra bildet for '+dato+' ('+poster.filter(x=>x.sted).length+' med sted)');
+    endret();
+  }catch(e){melding('⚠️ '+((e&&e.message)||'Noe gikk galt'),true);}
 }
 async function leggTilDag(){
   const dato=document.getElementById('pDato').value;
