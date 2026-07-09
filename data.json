@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-09T09:23:22.152Z",
+ "oppdatert": "2026-07-09T09:23:45.582Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -91,6 +91,12 @@
    "lat": 59.124218,
    "lng": 10.323222,
    "ikon": "✝️"
+  },
+  {
+   "navn": "Fotballbanen",
+   "lat": 59.125539,
+   "lng": 10.324091,
+   "ikon": "⚽️"
   }
  ],
  "program": {
