@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-07T10:29:26.127Z",
+ "oppdatert": "2026-07-09T08:42:47.058Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -257,6 +257,110 @@
     "t": "22:00",
     "slutt": null,
     "tekst": "Teens møtes på Soria Moria (husk toast)",
+    "sted": "Soria Moria"
+   },
+   {
+    "t": "22:30",
+    "slutt": null,
+    "tekst": "Teens Sydpynten (oppmøte utenfor kapellet)",
+    "sted": "Sydpynten"
+   }
+  ],
+  "2026-07-09": [
+   {
+    "t": "08:00",
+    "slutt": null,
+    "tekst": "Morgenbad",
+    "sted": null
+   },
+   {
+    "t": "09:00",
+    "slutt": "09:40",
+    "tekst": "Flexifrokost",
+    "sted": null
+   },
+   {
+    "t": "09:45",
+    "slutt": null,
+    "tekst": "Morgensamling for alle, med informasjon for dagen. Sted: utescenen",
+    "sted": "Utescenen"
+   },
+   {
+    "t": "10:00",
+    "slutt": null,
+    "tekst": "Bibeltimer: Småbarn – Rødstua, 1.-4.klasse – Peisestua, Tweens – Svenner Fyr / Vestre Sjøbod, Teens – Festsalen, Videregående – Færder Fyr /Østre Sjøbod",
+    "sted": null
+   },
+   {
+    "t": "10:15",
+    "slutt": null,
+    "tekst": "Bibeltime for voksne – Kapellet",
+    "sted": null
+   },
+   {
+    "t": "10:15",
+    "slutt": null,
+    "tekst": "Familie- og aktivitetstid. Kl. 12:00 Dragebåtrace med påfølgende stupe/hoppe/dødsekoncurranse",
+    "sted": null
+   },
+   {
+    "t": "14:00",
+    "slutt": "14:45",
+    "tekst": "Middag, fiskekaker",
+    "sted": null
+   },
+   {
+    "t": "14:45",
+    "slutt": null,
+    "tekst": "Familie- og aktivitetstid. Kl 15:15 Sjakk, se eget oppslag. Kl 15:15 Volleyballturning, se eget oppslag",
+    "sted": null
+   },
+   {
+    "t": "18:25",
+    "slutt": null,
+    "tekst": "Innlevering av dagens knatt",
+    "sted": null
+   },
+   {
+    "t": "18:30",
+    "slutt": "19:15",
+    "tekst": "Flexi kveldsmat",
+    "sted": null
+   },
+   {
+    "t": "19:30",
+    "slutt": null,
+    "tekst": "Aktivitet for tweens, oppmøte fotballbanen",
+    "sted": "Volleyball banen"
+   },
+   {
+    "t": "19:30",
+    "slutt": null,
+    "tekst": "Volleyball for voksne og vgs",
+    "sted": null
+   },
+   {
+    "t": "21:00",
+    "slutt": null,
+    "tekst": "Gospelnight i kapellet",
+    "sted": null
+   },
+   {
+    "t": "22:00",
+    "slutt": null,
+    "tekst": "Kveldskro for voksne",
+    "sted": "Kveldskro"
+   },
+   {
+    "t": "22:00",
+    "slutt": null,
+    "tekst": "Fotball VM: Frankrike - Marokko",
+    "sted": null
+   },
+   {
+    "t": "22:00",
+    "slutt": null,
+    "tekst": "Teens møtes på Soria Moria, husk toast",
     "sted": "Soria Moria"
    },
    {
