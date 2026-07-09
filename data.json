@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-09T08:47:42.799Z",
+ "oppdatert": "2026-07-09T08:47:50.659Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -282,7 +282,7 @@
    {
     "t": "09:45",
     "slutt": null,
-    "tekst": "Morgensamling for alle, med informasjon for dagen. Sted: utescenen",
+    "tekst": "Morgensamling for alle, med informasjon for dagen",
     "sted": "Utescenen"
    },
    {
@@ -294,26 +294,44 @@
    {
     "t": "10:15",
     "slutt": null,
-    "tekst": "Bibeltime for voksne – Kapellet",
+    "tekst": "Bibeltime for voksne",
     "sted": null
    },
    {
     "t": "10:15",
+    "slutt": "12:00",
+    "tekst": "Familie- og aktivitetstid",
+    "sted": null
+   },
+   {
+    "t": "12:00",
     "slutt": null,
-    "tekst": "Familie- og aktivitetstid. Kl. 12:00 Dragebåtrace med påfølgende stupe/hoppe/dødskonkurranse",
+    "tekst": "Dragebåtrace med påfølgende stupe/hoppe/dødskonkurranse",
     "sted": null
    },
    {
     "t": "14:00",
     "slutt": "14:45",
     "tekst": "Middag, fiskekaker",
-    "sted": null
+    "sted": "Matsalen"
    },
    {
     "t": "14:45",
-    "slutt": null,
-    "tekst": "Familie- og aktivitetstid. Kl 15:15 Sjakk, se eget oppslag. Kl 15:15 Volleyballturne ring, se eget oppslag",
+    "slutt": "15:15",
+    "tekst": "Familie- og aktivitetstid",
     "sted": null
+   },
+   {
+    "t": "15:15",
+    "slutt": null,
+    "tekst": "Sjakk",
+    "sted": null
+   },
+   {
+    "t": "15:15",
+    "slutt": null,
+    "tekst": "Volleyballturne ring",
+    "sted": "Volleyball banen"
    },
    {
     "t": "18:25",
@@ -331,13 +349,13 @@
     "t": "19:30",
     "slutt": null,
     "tekst": "Aktivitet for tweens, oppmøte fotballbanen",
-    "sted": "Volleyball banen"
+    "sted": null
    },
    {
     "t": "19:30",
     "slutt": null,
     "tekst": "Volleyball for voksne og vgs",
-    "sted": null
+    "sted": "Volleyball banen"
    },
    {
     "t": "21:00",
