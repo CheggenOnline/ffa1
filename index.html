@@ -81,7 +81,7 @@
   <button id="tab-info" onclick="vis('info')"><span class="ikon">ℹ️</span>Info</button>
 </div>
 <script>
-const VERSJON='2026-07-09.1';
+const VERSJON='2026-07-09.2';
 const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:20,maxNativeZoom:18,attribution:'© Kartverket'});
 const FOTO=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,maxNativeZoom:19,attribution:'© Esri'});
 const map=L.map('map',{center:[59.1243,10.3235],zoom:16,maxZoom:20,layers:[KART],zoomControl:false});
@@ -202,7 +202,7 @@ function vis(f){
   document.getElementById('fane-info').style.display=f==='info'?'block':'none';
   document.getElementById('sheet').style.display=f==='kart'?'flex':'none';
   document.getElementById('sentrer').style.display=f==='kart'?'block':'none';
-  if(f==='program')tegnProgram();
+  if(f==='program'){tegnProgram();setTimeout(skrollTilAktiv,120);}
   if(f==='info')tegnInfo();
 }
 function ukedag(d){return ['søndag','mandag','tirsdag','onsdag','torsdag','fredag','lørdag'][new Date(d+'T12:00').getDay()];}
@@ -210,25 +210,41 @@ function tegnProgram(){
   const dager=Object.keys(DATA.program).sort();
   const idag=iDag();
   if(!valgtDag||!DATA.program[valgtDag])valgtDag=DATA.program[idag]?idag:(dager.find(d=>d>=idag)||dager[dager.length-1]);
-  let h='<h1>📅 Program</h1><div>';
+  let h='<h1>📅 Program</h1>';
+  const infoListe=(DATA.info||[]).slice().sort((a,b)=>(b.ts||'')<(a.ts||'')?-1:1);
+  if(infoListe.length){
+    const ny=infoListe[0];
+    h+='<div class="card" style="cursor:pointer;padding:12px 14px;" onclick="vis(\'info\')">'
+      +'<div id="infoBannerTekst" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;line-height:1.45;"><b>ℹ️ '+esc(ny.tittel)+':</b> '+esc(ny.tekst)+'</div>'
+      +'<button id="infoBannerMer" style="display:none;border:none;background:none;color:var(--grønn);font-weight:800;font-size:13px;padding:6px 0 0;cursor:pointer;">Vis mer ›</button></div>';
+  }
+  h+='<div>';
   h+=dager.map(d=>'<button class="chip'+(d===valgtDag?' on':'')+'" onclick="valgtDag=\''+d+'\';tegnProgram()">'+(d===idag?'I dag':ukedag(d)+' '+ +d.slice(8))+'</button>').join('');
   h+='</div><div class="card">';
   if(valgtDag){
     h+='<div class="sub" style="font-weight:700;margin-bottom:4px;">'+ukedag(valgtDag)+' '+ +valgtDag.slice(8)+'. juli</div>';
     const nå=nåTid();
+    let aktivSatt=false;
     h+=(DATA.program[valgtDag]||[]).map(p=>{
       const ferdig=valgtDag<idag||(valgtDag===idag&&(p.slutt||p.t)<nå&&p.t<nå&&((p.slutt&&p.slutt<nå)||(!p.slutt&&p.t<nå&&minuttDiff(p.t,nå)>60)));
+      const erAktiv=!ferdig&&!aktivSatt&&valgtDag===idag&&(aktivSatt=true);
       const stedIdx=p.sted?DATA.steder.findIndex(s=>s.navn===p.sted):-1;
-      return '<div class="pRad'+(ferdig?' ferdig':'')+(stedIdx>=0?' klikkbar" onclick="velg('+stedIdx+')':'')+'"><span class="tid">'+p.t+(p.slutt?'–'+p.slutt:'')+'</span><span class="txt">'+esc(p.tekst)+'</span>'+(stedIdx>=0?'<span class="stedTag">'+ikonFor(DATA.steder[stedIdx])+' '+esc(p.sted)+' ›</span>':'')+'</div>';
+      return '<div'+(erAktiv?' id="aktivPost"':'')+' class="pRad'+(ferdig?' ferdig':'')+(stedIdx>=0?' klikkbar" onclick="velg('+stedIdx+')':'')+'"><span class="tid">'+p.t+(p.slutt?'–'+p.slutt:'')+'</span><span class="txt">'+esc(p.tekst)+'</span>'+(stedIdx>=0?'<span class="stedTag">'+ikonFor(DATA.steder[stedIdx])+' '+esc(p.sted)+' ›</span>':'')+'</div>';
     }).join('')||'<div class="sub">Ingen program denne dagen.</div>';
   }else h+='<div class="sub">Programmet kommer!</div>';
   h+='</div>';
   document.getElementById('fane-program').innerHTML=h;
+  const bt=document.getElementById('infoBannerTekst');
+  if(bt&&bt.scrollHeight>bt.clientHeight+2)document.getElementById('infoBannerMer').style.display='block';
+}
+function skrollTilAktiv(){
+  const f=document.getElementById('fane-program'),el=document.getElementById('aktivPost');
+  if(f&&el)f.scrollTo({top:Math.max(0,el.offsetTop-130),behavior:'smooth'});
 }
 function minuttDiff(a,b){const m=t=>+t.slice(0,2)*60+ +t.slice(3,5);return m(b)-m(a);}
 function tegnInfo(){
   let h='<h1>ℹ️ Info</h1>';
-  h+=(DATA.info||[]).slice().reverse().map(x=>'<div class="card"><div style="font-weight:800;margin-bottom:4px;">'+esc(x.tittel)+'</div><div style="font-size:15px;white-space:pre-wrap;">'+esc(x.tekst)+'</div></div>').join('')
+  h+=(DATA.info||[]).slice().sort((a,b)=>(b.ts||'')<(a.ts||'')?-1:1).map(x=>'<div class="card"><div style="font-weight:800;margin-bottom:4px;">'+esc(x.tittel)+'</div><div style="font-size:15px;white-space:pre-wrap;">'+esc(x.tekst)+'</div></div>').join('')
     ||'<div class="card sub">Ingen beskjeder ennå.</div>';
   h+='<div class="sub" style="text-align:center;margin-top:10px;">FFA1 · Versjon '+VERSJON+'</div>';
   h='<button id="adminLenke" onclick="location.href=\'admin.html\'">🔧</button>'+h;
