@@ -65,7 +65,7 @@
   <button class="knapp grønn" id="dagKnapp" onclick="leggTilDag()">Tolk og legg inn dagen</button>
   <div style="display:flex;gap:8px;">
     <button class="knapp grå" style="flex:1;" onclick="document.getElementById('progKam').click()">📷 Ta bilde av programmet</button>
-    <button class="knapp grå" style="flex:1;" onclick="document.getElementById('progFil').click()">📁 Last opp bilde</button>
+    <button class="knapp grå" style="flex:1;" onclick="document.getElementById('progFil').click()">📁 Last opp</button>
   </div>
   <input id="progKam" type="file" accept="image/*" capture="environment" style="display:none" onchange="tolkProgramBilde(this)">
   <input id="progFil" type="file" accept="image/*" style="display:none" onchange="tolkProgramBilde(this)">
@@ -114,7 +114,15 @@ async function låsOpp(){
   if(!HEMMELIG.gh){document.getElementById('låsFeil').textContent='Mangler GitHub-token.';HEMMELIG=null;return;}
   document.getElementById('lås').style.display='none';
   setTimeout(()=>map.invalidateSize(),200);
-  hentPublisert();
+  let pend=null;try{pend=localStorage.getItem('ffa1_pending');}catch(e){}
+  if(pend){
+    try{
+      D=JSON.parse(pend);
+      tegnSteder();tegnDager();tegnInfo();
+      melding('🔁 Fant upubliserte endringer fra sist – publiserer dem nå…',true);
+      publiser();
+    }catch(e){hentPublisert();}
+  }else hentPublisert();
 }
 
 const KART=L.tileLayer('https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',{maxZoom:20,maxNativeZoom:18,attribution:'© Kartverket'});
@@ -129,8 +137,14 @@ function melding(t,varig){const el=document.getElementById('status');el.textCont
 
 // ---------- Auto-publisering ----------
 let pubTimer=null,publisererNå=false,ventendePub=false;
-function endret(){planleggPubliser();}
-function planleggPubliser(){clearTimeout(pubTimer);melding('💾 Lagrer…',true);pubTimer=setTimeout(publiser,1500);}
+function endret(){
+  try{localStorage.setItem('ffa1_pending',JSON.stringify(D));}catch(e){}
+  planleggPubliser();
+}
+function planleggPubliser(){clearTimeout(pubTimer);melding('💾 Lagrer…',true);pubTimer=setTimeout(publiser,400);}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'&&pubTimer){clearTimeout(pubTimer);pubTimer=null;publiser();}
+});
 async function publiser(){
   if(publisererNå){ventendePub=true;return;}
   publisererNå=true;
@@ -146,6 +160,7 @@ async function publiser(){
     if(r.status===401||r.status===403)throw new Error('Token avvist – feil passord/konfig?');
     if(r.status===409){publisererNå=false;return publiser();}
     if(!r.ok)throw new Error('GitHub-feil ('+r.status+')');
+    try{localStorage.removeItem('ffa1_pending');}catch(e){}
     melding('✅ Publisert! Synlig hos alle om ~1 min.');
   }catch(e){melding('⚠️ '+e.message,true);}
   publisererNå=false;
