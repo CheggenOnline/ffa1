@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-09T09:23:45.582Z",
+ "oppdatert": "2026-07-10T07:46:13.529Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -386,6 +386,122 @@
     "slutt": null,
     "tekst": "Fotball VM: Frankrike - Marokko",
     "sted": null
+   },
+   {
+    "t": "22:00",
+    "slutt": null,
+    "tekst": "Teens møtes på Soria Moria, husk toast",
+    "sted": "Soria Moria"
+   },
+   {
+    "t": "22:30",
+    "slutt": null,
+    "tekst": "Teens Sydpynten (oppmøte utenfor kapellet)",
+    "sted": "Sydpynten"
+   }
+  ],
+  "2026-07-10": [
+   {
+    "t": "08:00",
+    "slutt": null,
+    "tekst": "Morgenbad",
+    "sted": null
+   },
+   {
+    "t": "09:00",
+    "slutt": "09:40",
+    "tekst": "Flexifrokost",
+    "sted": null
+   },
+   {
+    "t": "09:45",
+    "slutt": null,
+    "tekst": "Morgensamling for alle, med informasjon for dagen. Sted: utescenen",
+    "sted": "Utescenen"
+   },
+   {
+    "t": "10:00",
+    "slutt": null,
+    "tekst": "Bibeltimer: Småbarn – Rødstua, 1.-4.klasse – Peisestua, Tweens – Svenner Fyr / Vestre Sjøbod, Teens – Festsalen, Videreguaende – Færder Fyr / Østre Sjøbod",
+    "sted": null
+   },
+   {
+    "t": "10:15",
+    "slutt": null,
+    "tekst": "Bibletime for voksne - Kapellet",
+    "sted": "Kapellet"
+   },
+   {
+    "t": "11:30",
+    "slutt": null,
+    "tekst": "Familie- og aktivitetstid - Sjakk, se eget oppslag",
+    "sted": null
+   },
+   {
+    "t": "11:30",
+    "slutt": null,
+    "tekst": "Familie- og aktivitetstid - Flåtebygging",
+    "sted": null
+   },
+   {
+    "t": "11:30",
+    "slutt": null,
+    "tekst": "Familie- og aktivitetstid - Klatring",
+    "sted": null
+   },
+   {
+    "t": "14:00",
+    "slutt": "14:45",
+    "tekst": "Middag, taco",
+    "sted": null
+   },
+   {
+    "t": "15:15",
+    "slutt": null,
+    "tekst": "Familie- og aktivitetstid - Volleyballturnering, se eget oppslag",
+    "sted": "Volleyball banen"
+   },
+   {
+    "t": "18:25",
+    "slutt": null,
+    "tekst": "Innlevering dagens knatt",
+    "sted": null
+   },
+   {
+    "t": "18:30",
+    "slutt": "19:15",
+    "tekst": "Flexi kveldsmat",
+    "sted": null
+   },
+   {
+    "t": "19:30",
+    "slutt": null,
+    "tekst": "Funky disco fredag",
+    "sted": null
+   },
+   {
+    "t": "21:00",
+    "slutt": null,
+    "tekst": "Fotball VM: Spania - Belgia",
+    "sted": null
+   },
+   {
+    "t": "21:30",
+    "slutt": null,
+    "tekst": "Nattmanøver for tweens",
+    "sted": null
+   },
+   {
+    "t": "21:45",
+    "slutt": null,
+    "tekst": "Kveldsianker i kapellet",
+    "sted": "Kapellet"
+   },
+   {
+    "t": "22:00",
+    "slutt": null,
+    "tekst": "Kveldskro for voksne",
+    "sted": "Kveldskro"
    },
    {
     "t": "22:00",
