@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-10T07:46:13.529Z",
+ "oppdatert": "2026-07-10T07:46:27.921Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -416,7 +416,7 @@
    {
     "t": "09:45",
     "slutt": null,
-    "tekst": "Morgensamling for alle, med informasjon for dagen. Sted: utescenen",
+    "tekst": "Morgensamling for alle, med informasjon for dagen",
     "sted": "Utescenen"
    },
    {
@@ -428,13 +428,13 @@
    {
     "t": "10:15",
     "slutt": null,
-    "tekst": "Bibletime for voksne - Kapellet",
+    "tekst": "Bibletime for voksne",
     "sted": "Kapellet"
    },
    {
     "t": "11:30",
     "slutt": null,
-    "tekst": "Familie- og aktivitetstid - Sjakk, se eget oppslag",
+    "tekst": "Familie- og aktivitetstid - Sjakk",
     "sted": null
    },
    {
@@ -458,7 +458,7 @@
    {
     "t": "15:15",
     "slutt": null,
-    "tekst": "Familie- og aktivitetstid - Volleyballturnering, se eget oppslag",
+    "tekst": "Familie- og aktivitetstid - Volleyballturnering",
     "sted": "Volleyball banen"
    },
    {
@@ -512,7 +512,7 @@
    {
     "t": "22:30",
     "slutt": null,
-    "tekst": "Teens Sydpynten (oppmøte utenfor kapellet)",
+    "tekst": "Teens Sydpynten",
     "sted": "Sydpynten"
    }
   ]
