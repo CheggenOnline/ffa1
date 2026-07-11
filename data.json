@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-11T07:21:39.612Z",
+ "oppdatert": "2026-07-11T07:21:52.597Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -538,7 +538,7 @@
    {
     "t": "09:45",
     "slutt": null,
-    "tekst": "Morgensamling for alle, med informasjon for dagen. Sted: utescenen",
+    "tekst": "Morgensamling for alle, med informasjon for dagen",
     "sted": "Utescenen"
    },
    {
@@ -550,20 +550,20 @@
    {
     "t": "10:15",
     "slutt": null,
-    "tekst": "Bibletime for voksne – Kapellet - ønskekonsert",
+    "tekst": "Bibletime for voksne - ønskekonsert",
     "sted": "Kapellet"
    },
    {
     "t": "10:15",
     "slutt": null,
-    "tekst": "Familie- og aktivitetstid Kl. 12: Kjempehuske",
+    "tekst": "Familie- og aktivitetstid. Kl. 12: Kjempehuske",
     "sted": null
    },
    {
     "t": "14:00",
     "slutt": "14:45",
     "tekst": "Middag, biff stroganoff",
-    "sted": null
+    "sted": "Matsalen"
    },
    {
     "t": "15:15",
@@ -598,26 +598,26 @@
    {
     "t": "19:30",
     "slutt": null,
-    "tekst": "Underholdningskveldt, utescenen",
+    "tekst": "Underholdningskveldt",
     "sted": "Utescenen"
    },
    {
     "t": "21:00",
     "slutt": null,
-    "tekst": "Pizza og film for tweens / teens / vgs, på Svenner",
+    "tekst": "Pizza og film for tweens / teens / vgs",
     "sted": null
    },
    {
     "t": "21:00",
     "slutt": null,
-    "tekst": "Film for 1-4 klasse på Rødstua (ta med toast)",
+    "tekst": "Film for 1-4 klasse (ta med toast)",
     "sted": "Rødstua"
    },
    {
     "t": "21:30",
     "slutt": null,
     "tekst": "Festkveldt for voksne (is og jordbær i lunden nedenfor Rødstua)",
-    "sted": "Rødstua"
+    "sted": null
    },
    {
     "t": "23:00",
