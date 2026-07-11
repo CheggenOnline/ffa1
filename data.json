@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-10T07:46:27.921Z",
+ "oppdatert": "2026-07-11T07:21:39.612Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -514,6 +514,116 @@
     "slutt": null,
     "tekst": "Teens Sydpynten",
     "sted": "Sydpynten"
+   }
+  ],
+  "2026-07-11": [
+   {
+    "t": "03:00",
+    "slutt": null,
+    "tekst": "Fotball VM: Argentina - Sveits",
+    "sted": null
+   },
+   {
+    "t": "08:00",
+    "slutt": null,
+    "tekst": "Morgenbad",
+    "sted": null
+   },
+   {
+    "t": "09:00",
+    "slutt": "09:40",
+    "tekst": "Flexifrokost",
+    "sted": null
+   },
+   {
+    "t": "09:45",
+    "slutt": null,
+    "tekst": "Morgensamling for alle, med informasjon for dagen. Sted: utescenen",
+    "sted": "Utescenen"
+   },
+   {
+    "t": "10:00",
+    "slutt": null,
+    "tekst": "Bibeltimer: Småbarn – Rødstua, 1.-4.klasse – Peisestua, Tweens – Svenner Fyr/ Vestre Sjøbod, Teens – Festsalen, Videregående – Færder Fyr /Østre Sjøbod",
+    "sted": null
+   },
+   {
+    "t": "10:15",
+    "slutt": null,
+    "tekst": "Bibletime for voksne – Kapellet - ønskekonsert",
+    "sted": "Kapellet"
+   },
+   {
+    "t": "10:15",
+    "slutt": null,
+    "tekst": "Familie- og aktivitetstid Kl. 12: Kjempehuske",
+    "sted": null
+   },
+   {
+    "t": "14:00",
+    "slutt": "14:45",
+    "tekst": "Middag, biff stroganoff",
+    "sted": null
+   },
+   {
+    "t": "15:15",
+    "slutt": null,
+    "tekst": "Volleyballturnering, se eget oppslag",
+    "sted": "Volleyball banen"
+   },
+   {
+    "t": "16:30",
+    "slutt": null,
+    "tekst": "Finaleflight diskgolf: Peder, Jostein, Johan H, John S",
+    "sted": null
+   },
+   {
+    "t": "17:45",
+    "slutt": null,
+    "tekst": "Finale sjakk: Asbjørn vs Erlend",
+    "sted": null
+   },
+   {
+    "t": "18:25",
+    "slutt": null,
+    "tekst": "Innlevering av dagens knatt",
+    "sted": null
+   },
+   {
+    "t": "18:30",
+    "slutt": "19:15",
+    "tekst": "Flexi kveldsmat",
+    "sted": null
+   },
+   {
+    "t": "19:30",
+    "slutt": null,
+    "tekst": "Underholdningskveldt, utescenen",
+    "sted": "Utescenen"
+   },
+   {
+    "t": "21:00",
+    "slutt": null,
+    "tekst": "Pizza og film for tweens / teens / vgs, på Svenner",
+    "sted": null
+   },
+   {
+    "t": "21:00",
+    "slutt": null,
+    "tekst": "Film for 1-4 klasse på Rødstua (ta med toast)",
+    "sted": "Rødstua"
+   },
+   {
+    "t": "21:30",
+    "slutt": null,
+    "tekst": "Festkveldt for voksne (is og jordbær i lunden nedenfor Rødstua)",
+    "sted": "Rødstua"
+   },
+   {
+    "t": "23:00",
+    "slutt": null,
+    "tekst": "Fotball VM: Norge - England",
+    "sted": null
    }
   ]
  },
