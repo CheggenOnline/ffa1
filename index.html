@@ -16,10 +16,10 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root{--grønn:#14604b;--krem:#f6f3ea;--gul:#e8a13c;}
-  html,body{height:100%;margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#fff;}
+  html,body{height:100%;margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#fff;overscroll-behavior:none;}
   body{position:fixed;inset:0;overflow:hidden;width:100%;}
   #map{position:fixed;inset:0;z-index:1;}
-  .fane{position:fixed;inset:0;z-index:5;background:var(--krem);overflow:auto;overscroll-behavior:contain;display:none;padding:calc(14px + env(safe-area-inset-top)) 14px calc(84px + env(safe-area-inset-bottom));box-sizing:border-box;}
+  .fane{position:fixed;inset:0;z-index:5;background:var(--krem);overflow:auto;overscroll-behavior:none;display:none;padding:calc(14px + env(safe-area-inset-top)) 14px calc(84px + env(safe-area-inset-bottom));box-sizing:border-box;}
   h1{font-size:21px;margin:4px 0 12px;color:#1f2d27;}
   .card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
   .tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;box-shadow:0 -2px 10px rgba(0,0,0,.12);padding-bottom:env(safe-area-inset-bottom,0px);z-index:100;}
