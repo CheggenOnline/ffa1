@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-12T18:03:16.008Z",
+ "oppdatert": "2026-07-12T18:04:52.653Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -659,68 +659,6 @@
    }
   ],
   "2026-01-01": [
-   {
-    "t": "17:30",
-    "slutt": "18:00",
-    "tekst": "Ankomst og innsjekk",
-    "sted": null
-   },
-   {
-    "t": "18:00",
-    "slutt": "19:00",
-    "tekst": "Apningssamling - Huske på leirtemal! Dagens: Bøtta",
-    "sted": null
-   },
-   {
-    "t": "19:00",
-    "slutt": "19:30",
-    "tekst": "Kveldsmat",
-    "sted": null
-   },
-   {
-    "t": "19:30",
-    "slutt": "20:00",
-    "tekst": "Mobiltid",
-    "sted": null
-   },
-   {
-    "t": "20:00",
-    "slutt": "21:00",
-    "tekst": "Felles aktivitet (fargegruppene) - bli kjent",
-    "sted": null
-   },
-   {
-    "t": "21:00",
-    "slutt": null,
-    "tekst": "Felles samling",
-    "sted": null
-   },
-   {
-    "t": "21:30",
-    "slutt": "22:00",
-    "tekst": "Romsamling på hyttene og legging",
-    "sted": null
-   },
-   {
-    "t": "22:00",
-    "slutt": null,
-    "tekst": "Ro på hyttene",
-    "sted": null
-   },
-   {
-    "t": "22:00",
-    "slutt": "23:00",
-    "tekst": "Hjelpe til med å få ro på hyttene",
-    "sted": null
-   },
-   {
-    "t": "22:00",
-    "slutt": "00:00",
-    "tekst": "Lederkro",
-    "sted": "Kveldskro"
-   }
-  ],
-  "2026-08-03": [
    {
     "t": "17:30",
     "slutt": "18:00",
