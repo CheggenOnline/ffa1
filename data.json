@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-12T07:45:27.649Z",
+ "oppdatert": "2026-07-12T07:45:37.234Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -631,13 +631,13 @@
     "t": "08:00",
     "slutt": null,
     "tekst": "Morgenbad",
-    "sted": null
+    "sted": "Stranden"
    },
    {
     "t": "09:00",
     "slutt": "09:45",
     "tekst": "Flexifrokost",
-    "sted": null
+    "sted": "Matsalen"
    },
    {
     "t": "10:15",
@@ -648,7 +648,7 @@
    {
     "t": "10:15",
     "slutt": "13:00",
-    "tekst": "Gudstjeneste.Vasking av eget rom og fellesarealer. Eget rom: Støvsuge rom, Re opp senger, Tømme søppel, Våtmoppe gulv med såpefritt vann, Vaske servant og speil, De med eget bad: vaske toalett, servant, speil med spray og klut (se båttekott). Ta kontakt med vertskap når eget rom er ferdig, slik at vask av fellesareal kan tildeles. Alt skal være ferdig innen kl 13:00",
+    "tekst": "Gudstjeneste. Vasking av eget rom og fellesarealer. Eget rom: Støvsuge rom, Re opp senger, Tømme søppel, Våtmoppe gulv med såpefritt vann, Vaske servant og speil, De med eget bad: vaske toalett, servant, speil med spray og klut (se båttekott). Ta kontakt med vertskap når eget rom er ferdig, slik at vask av fellesareal kan tildeles. Alt skal være ferdig innen kl 13:00",
     "sted": "Kapellet"
    }
   ]
