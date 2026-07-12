@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-12T07:48:53.163Z",
+ "oppdatert": "2026-07-12T07:50:20.572Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -637,13 +637,13 @@
     "t": "09:00",
     "slutt": "09:45",
     "tekst": "Flexifrokost",
-    "sted": null
+    "sted": "Matsalen"
    },
    {
     "t": "10:15",
     "slutt": null,
     "tekst": "Ferdig pakket ut av rommet. All bagasje enten i biler eller utenfor matsalen.",
-    "sted": "Matsalen"
+    "sted": null
    },
    {
     "t": "10:15",
