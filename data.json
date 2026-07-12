@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-12T07:50:39.007Z",
+ "oppdatert": "2026-07-12T18:02:53.880Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -656,6 +656,68 @@
     "slutt": "13:00",
     "tekst": "Vasking av eget rom og fellesarealer. Eget rom: Støvsuge rom, Re opp senger, Tømme søppel, Våtmoppe gulv med såpefritt vann, Vaske servant og speil. De med eget bad: vaske toalett, servant, speil med spray og klut. Ta kontakt med vertskap når eget rom er ferdig, slik at vask av fellesareal kan tildeles.",
     "sted": null
+   }
+  ],
+  "2026-01-01": [
+   {
+    "t": "17:30",
+    "slutt": "18:00",
+    "tekst": "Ankomst og innsjekk",
+    "sted": null
+   },
+   {
+    "t": "18:00",
+    "slutt": "19:00",
+    "tekst": "Apningssamling - Huske på leirtemal! Dagens: Bøtta",
+    "sted": null
+   },
+   {
+    "t": "19:00",
+    "slutt": "19:30",
+    "tekst": "Kveldsmat",
+    "sted": null
+   },
+   {
+    "t": "19:30",
+    "slutt": "20:00",
+    "tekst": "Mobiltid",
+    "sted": null
+   },
+   {
+    "t": "20:00",
+    "slutt": "21:00",
+    "tekst": "Felles aktivitet (fargegruppene) - bli kjent",
+    "sted": null
+   },
+   {
+    "t": "21:00",
+    "slutt": null,
+    "tekst": "Felles samling",
+    "sted": null
+   },
+   {
+    "t": "21:30",
+    "slutt": "22:00",
+    "tekst": "Romsamling på hyttene og legging",
+    "sted": null
+   },
+   {
+    "t": "22:00",
+    "slutt": null,
+    "tekst": "Ro på hyttene",
+    "sted": null
+   },
+   {
+    "t": "22:00",
+    "slutt": "23:00",
+    "tekst": "Hjelpe til med å få ro på hyttene",
+    "sted": null
+   },
+   {
+    "t": "22:00",
+    "slutt": "00:00",
+    "tekst": "Lederkro",
+    "sted": "Kveldskro"
    }
   ]
  },
