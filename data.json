@@ -1,5 +1,5 @@
 {
- "oppdatert": "2026-07-11T12:46:58.241Z",
+ "oppdatert": "2026-07-12T07:45:27.649Z",
  "steder": [
   {
    "navn": "Rødstua",
@@ -624,6 +624,32 @@
     "slutt": null,
     "tekst": "Fotball VM: Norge - England",
     "sted": null
+   }
+  ],
+  "2026-07-12": [
+   {
+    "t": "08:00",
+    "slutt": null,
+    "tekst": "Morgenbad",
+    "sted": null
+   },
+   {
+    "t": "09:00",
+    "slutt": "09:45",
+    "tekst": "Flexifrokost",
+    "sted": null
+   },
+   {
+    "t": "10:15",
+    "slutt": null,
+    "tekst": "Ferdig pakket ut av rommet. All bagasje enten i biler eller utenfor matsalen.",
+    "sted": "Matsalen"
+   },
+   {
+    "t": "10:15",
+    "slutt": "13:00",
+    "tekst": "Gudstjeneste.Vasking av eget rom og fellesarealer. Eget rom: Støvsuge rom, Re opp senger, Tømme søppel, Våtmoppe gulv med såpefritt vann, Vaske servant og speil, De med eget bad: vaske toalett, servant, speil med spray og klut (se båttekott). Ta kontakt med vertskap når eget rom er ferdig, slik at vask av fellesareal kan tildeles. Alt skal være ferdig innen kl 13:00",
+    "sted": "Kapellet"
    }
   ]
  },
