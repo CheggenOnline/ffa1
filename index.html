@@ -318,7 +318,11 @@ setInterval(()=>{if(document.getElementById('fane-program').style.display==='blo
 function settTabsH(){const t=document.querySelector('.tabs');if(t)document.documentElement.style.setProperty('--tabsH',(t.offsetHeight-1)+'px');}
 window.addEventListener('resize',settTabsH);settTabsH();setTimeout(settTabsH,300);
 try{const husk=sessionStorage.getItem('ffa1_fane');if(husk&&husk!=='kart')vis(husk);}catch(e){}
+const KH_API='https://kh-api.cheggen.workers.dev';
+function ffaUid(){let u=null;try{u=localStorage.getItem('ffa1_uid');if(!u){u=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem('ffa1_uid',u);}}catch(e){u='anon';}return u;}
+function loggBesok(){try{fetch(KH_API+'/visit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:ffaUid(),app:'ffa1'})}).catch(function(){});}catch(e){}}
 hentData();
+loggBesok();
 </script>
 </body>
 </html>

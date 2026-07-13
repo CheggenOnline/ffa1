@@ -43,6 +43,13 @@
   .tolkrad{display:flex;gap:8px;flex-wrap:wrap;}
   .tolkrad button{flex:1;min-width:130px;}
   .liten{padding:8px 10px;font-size:13px;width:auto;margin-top:0;}
+  .bar{display:flex;align-items:flex-end;gap:2px;height:120px;margin-top:8px;}
+  .bar .b{flex:1;background:var(--grønn);border-radius:3px 3px 0 0;min-height:2px;position:relative;}
+  .bar .b span{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:#888;}
+  .stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .stat .box{flex:1;min-width:90px;background:#f2efe6;border-radius:12px;padding:10px;text-align:center;}
+  .stat .box b{display:block;font-size:22px;color:var(--grønn);}
+  .stat .box span{font-size:12px;color:#7a857f;}
 </style>
 </head>
 <body>
@@ -104,11 +111,22 @@
 </div>
 
 <div class="card">
+  <h2>📊 Bruk</h2>
+  <div class="stat" id="statTall"><div class="sub">Laster…</div></div>
+  <h2 style="margin-top:14px;">Besøk gjennom døgnet</h2>
+  <div class="bar" id="barTime"></div>
+  <h2 style="margin-top:26px;">Besøk gjennom uka</h2>
+  <div class="bar" id="barDag"></div>
+  <button class="knapp grå" style="margin-top:24px;" onclick="hentStats()">🔄 Oppdater statistikk</button>
+</div>
+
+<div class="card">
   <button class="knapp grå" onclick="hentPublisert()">⬇️ Hent publiserte data på nytt</button>
 </div>
 
 <script>
 const REPO='CheggenOnline/ffa1', FIL='data.json';
+const KH_API='https://kh-api.cheggen.workers.dev';
 // Kryptert konfig {gh, ai} – settes inn når tokens er klare. Tom = manuell modus.
 const KONFIG='lcJxirKHUjLC2I7MsCI+wSsMPEOcgr6SNFe+vaeqkAYAUF0UlOsZW3UweM/DUuoLnFvbKlHhbcbRngD8iuJt8UE54kDagLqRA8Er42iflZkM22chqDSthEShLnGh0vcgKKlhX4FsgaQvODeaYy15DjKSsrQ2QF136eurM7sKoCWpl0pHoie3BJo5pfGsadbXWosjDUEwgH4ZEt9inQJFruy6Ijbx41TbVb74jq15I6hqxr8WnS+7+3Sc7P16fuiFVGDXRohp2z0i3gHLN+fbWUInpy6AnyW9wuPu63XlBFTYz6XJurXYZRp0VABh6VLbj5inY7jksOU5LZYOrsrfpvPem9t0Sg==';
 let HEMMELIG=null; // {gh, ai} etter innlogging
@@ -195,6 +213,7 @@ async function hentPublisert(){
     const d=await fetch('https://cheggenonline.github.io/ffa1/data.json?v='+Date.now()).then(r=>r.json());
     D=d;tegnSteder();tegnDager();tegnInfo();
     if(document.getElementById('pDato').value)lastDagTilRedigering(document.getElementById('pDato').value);
+    hentStats();
     melding('✅ Hentet gjeldende publiserte data');
   }catch(e){melding('⚠️ Klarte ikke hente: '+e.message);}
 }
@@ -380,6 +399,25 @@ function leggTilInfo(){
 function slettInfo(i){if(confirm('Slette beskjeden?')){D.info.splice(i,1);tegnInfo();endret();}}
 function tegnInfo(){
   document.getElementById('infoListe').innerHTML=D.info.map((x,i)=>'<div class="rad"><span class="n">'+esc(x.tittel)+'</span><button onclick="slettInfo('+i+')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen beskjeder.</div>';
+}
+async function hentStats(){
+  try{
+    const r=await fetch(KH_API+'/stats?app=ffa1&v='+Date.now());
+    if(!r.ok)throw new Error('feil '+r.status);
+    const st=await r.json();
+    const sist=st.sisteBesok?new Date(st.sisteBesok).toLocaleString('nb-NO',{dateStyle:'short',timeStyle:'short'}):'–';
+    document.getElementById('statTall').innerHTML=
+      '<div class="box"><b>'+(st.unike||0)+'</b><span>enheter</span></div>'
+      +'<div class="box"><b>'+(st.totalt||0)+'</b><span>åpninger totalt</span></div>'
+      +'<div class="box"><b style="font-size:14px;">'+sist+'</b><span>siste besøk</span></div>';
+    tegnBar('barTime',st.byHour||[],i=>i%3===0?i+'':'');
+    const dg=['Ma','Ti','On','To','Fr','Lø','Sø'];
+    tegnBar('barDag',st.byDay||[],i=>dg[i]);
+  }catch(e){document.getElementById('statTall').innerHTML='<div class="sub">⚠️ Klarte ikke hente statistikk: '+e.message+'</div>';}
+}
+function tegnBar(id,arr,label){
+  const maks=Math.max(1,...arr);
+  document.getElementById(id).innerHTML=arr.map((v,i)=>'<div class="b" title="'+v+'" style="height:'+Math.round(v/maks*100)+'%"><span>'+label(i)+'</span></div>').join('');
 }
 tegnSteder();tegnDager();tegnInfo();
 document.getElementById('pDato').value=new Date().toISOString().slice(0,10);
