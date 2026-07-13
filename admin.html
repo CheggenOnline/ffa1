@@ -33,6 +33,16 @@
   .emoji-marker{font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.4);text-align:center;line-height:26px;}
   #lås{position:fixed;inset:0;z-index:3000;background:#f6f3ea;display:flex;align-items:center;justify-content:center;padding:20px;}
   #lås .boks{background:#fff;border-radius:18px;padding:22px;max-width:340px;width:100%;box-shadow:0 4px 18px rgba(0,0,0,.15);text-align:center;}
+  table.prog{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px;}
+  table.prog th{text-align:left;font-size:12px;color:#5a655f;padding:4px 4px;}
+  table.prog td{padding:3px 3px;vertical-align:top;border-top:1px solid #f0ede4;}
+  table.prog input,table.prog select{margin-top:0;padding:7px 8px;font-size:14px;width:100%;box-sizing:border-box;}
+  .tidcell{display:flex;gap:4px;align-items:center;}
+  .tidcell input{width:86px;}
+  .xknapp{border:none;background:#f3d6d6;color:#a33;border-radius:8px;padding:6px 8px;font-weight:800;cursor:pointer;}
+  .tolkrad{display:flex;gap:8px;flex-wrap:wrap;}
+  .tolkrad button{flex:1;min-width:130px;}
+  .liten{padding:8px 10px;font-size:13px;width:auto;margin-top:0;}
 </style>
 </head>
 <body>
@@ -58,17 +68,25 @@
 
 <div class="card">
   <h2>📅 Dagsprogram</h2>
-  <div id="dagListe"></div>
   <label>Dato</label><input id="pDato" type="date">
-  <label>Lim inn programmet for dagen (fritekst)</label>
-  <textarea id="pTekst" placeholder="15:00  Registrering&#10;18:30–19:15  Flexi kveldsmat&#10;19:30  Åpningskveld, utescenen"></textarea>
-  <button class="knapp grønn" id="dagKnapp" onclick="leggTilDag()">Tolk og legg inn dagen</button>
-  <div style="display:flex;gap:8px;">
-    <button class="knapp grå" style="flex:1;" onclick="document.getElementById('progKam').click()">📷 Ta bilde av programmet</button>
-    <button class="knapp grå" style="flex:1;" onclick="document.getElementById('progFil').click()">📁 Last opp</button>
+  <div class="tolkrad" style="margin-top:10px;">
+    <button class="knapp grå liten" onclick="document.getElementById('inFil').click()">📁 Fil</button>
+    <button class="knapp grå liten" onclick="document.getElementById('inKam').click()">📷 Kamera</button>
+    <button class="knapp grå liten" onclick="document.getElementById('inBib').click()">🖼️ Bildebibliotek</button>
+    <button class="knapp grå liten" onclick="tolkUtklipp()">📋 Utklippstavle</button>
   </div>
-  <input id="progKam" type="file" accept="image/*" capture="environment" style="display:none" onchange="tolkProgramBilde(this)">
-  <input id="progFil" type="file" accept="image/*" style="display:none" onchange="tolkProgramBilde(this)">
+  <input id="inFil" type="file" accept="image/*" style="display:none" onchange="tolkFraFil(this)">
+  <input id="inKam" type="file" accept="image/*" capture="environment" style="display:none" onchange="tolkFraFil(this)">
+  <input id="inBib" type="file" accept="image/*" style="display:none" onchange="tolkFraFil(this)">
+  <div class="sub" style="margin-top:8px;">…eller lim inn programmet som tekst og tolk:</div>
+  <textarea id="pTekst" placeholder="15:00  Registrering&#10;18:30–19:15  Kveldsmat&#10;19:30  Åpningskveld på utescenen"></textarea>
+  <button class="knapp grå" onclick="tolkFraTekst()">🤖 Tolk teksten</button>
+  <h2 style="margin-top:16px;">Program for dagen</h2>
+  <div id="progRedigering"></div>
+  <button class="knapp grå" onclick="leggTilRad()">➕ Legg til linje</button>
+  <button class="knapp grønn" onclick="lagreProgram()">💾 Lagre program for dagen</button>
+  <h2 style="margin-top:16px;">Lagrede dager</h2>
+  <div id="dagListe"></div>
 </div>
 
 <div class="card">
@@ -170,6 +188,7 @@ async function hentPublisert(){
   try{
     const d=await fetch('https://cheggenonline.github.io/ffa1/data.json?v='+Date.now()).then(r=>r.json());
     D=d;tegnSteder();tegnDager();tegnInfo();
+    if(document.getElementById('pDato').value)lastDagTilRedigering(document.getElementById('pDato').value);
     melding('✅ Hentet gjeldende publiserte data');
   }catch(e){melding('⚠️ Klarte ikke hente: '+e.message);}
 }
@@ -207,12 +226,14 @@ if(navigator.geolocation)navigator.geolocation.watchPosition(p=>{
   else meMark.setLatLng(minPos);
 },null,{enableHighAccuracy:true,maximumAge:3000});
 
-// ---------- Program ----------
+// ---------- Program (som Knattholmen) ----------
+let arbeidsposter=[];
+function escA(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function regexParse(txt){
   const ut=[];
   txt.split('\n').forEach(l=>{
     l=l.trim().replace(/\s+/g,' ');
-    const m=l.match(/^(\d{1,2})[:.](\d{2})\s*(?:[–\-—]\s*(\d{1,2})[:.](\d{2}))?\s+(.+)$/);
+    const m=l.match(/^(\d{1,2})[:.](\d{2})\s*(?:[\u2013\-\u2014]\s*(\d{1,2})[:.](\d{2}))?\s+(.+)$/);
     if(!m)return;
     const t=('0'+m[1]).slice(-2)+':'+m[2];
     const slutt=m[3]?('0'+m[3]).slice(-2)+':'+m[4]:null;
@@ -228,7 +249,7 @@ async function claudeParse(txt){
     'x-api-key':HEMMELIG.ai,'anthropic-version':'2023-06-01','content-type':'application/json',
     'anthropic-dangerous-direct-browser-access':'true'},
     body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,
-      system:'Du tolker dagsprogram for en norsk familieleir til strukturert JSON. Kjente steder på leiren: '+D.steder.map(s=>s.navn).join(', ')+'. Regler: én post per programpunkt; "t"=starttid HH:MM; "slutt"=sluttid HH:MM eller null; "tekst"=programteksten (uten tidene, ellers ordrett); "sted"=EKSAKT ett av de kjente stedsnavnene hvis posten tydelig hører til der (nevnt i teksten, evt. i bøyd form), ellers null. Ignorer overskrifter og tomme linjer. Svar KUN med gyldig JSON: {"poster":[{"t":"..","slutt":..,"tekst":"..","sted":..}]}',
+      system:'Du tolker dagsprogram for en norsk familieleir til strukturert JSON. Kjente steder paa leiren: '+D.steder.map(s=>s.navn).join(', ')+'. Regler: en post per programpunkt; "t"=starttid HH:MM; "slutt"=sluttid HH:MM eller null; "tekst"=programteksten (uten tidene, ellers ordrett); "sted"=EKSAKT ett av de kjente stedsnavnene hvis posten tydelig hoerer til der (nevnt i teksten, evt. i boeyd form), ellers null. Ignorer overskrifter og tomme linjer. Svar KUN med gyldig JSON: {"poster":[{"t":"..","slutt":..,"tekst":"..","sted":..}]}',
       messages:[{role:'user',content:txt}]})});
   if(!res.ok)throw new Error('Claude-feil ('+res.status+')');
   const data=await res.json();
@@ -248,65 +269,129 @@ function skalerBilde(f){return new Promise((ok,feil)=>{
     URL.revokeObjectURL(img.src);ok(b64);};
   img.onerror=()=>feil(new Error('Klarte ikke lese bildet'));
   img.src=URL.createObjectURL(f);});}
-async function tolkProgramBilde(inp){
+async function tolkBildeTilPoster(file){
+  const b64=await skalerBilde(file);
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{
+    'x-api-key':HEMMELIG.ai,'anthropic-version':'2023-06-01','content-type':'application/json',
+    'anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,
+      system:'Du tolker et fotografert/skannet dagsprogram for en norsk familieleir til strukturert JSON. Kjente steder paa leiren: '+D.steder.map(s=>s.navn).join(', ')+'. Regler: les ALLE programpunktene i bildet; "t"=starttid HH:MM; "slutt"=sluttid HH:MM eller null; "tekst"=programteksten (uten tidene, ellers ordrett); "sted"=EKSAKT ett av de kjente stedsnavnene hvis posten tydelig hoerer til der (nevnt i teksten, evt. boeyd form), ellers null; "dato"=datoen som staar i programmet som "YYYY-MM-DD" (anta aar 2026), eller null. Svar KUN med gyldig JSON: {"dato":..,"poster":[{"t":"..","slutt":..,"tekst":"..","sted":..}]}',
+      messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Tolk dette dagsprogrammet.'}]}]})});
+  if(res.status===401||res.status===403)throw new Error('Noekkel avvist - logg inn paa nytt');
+  if(!res.ok)throw new Error('Claude-feil ('+res.status+')');
+  const data=await res.json();
+  let txt=((data.content&&data.content[0]&&data.content[0].text)||'').replace(/```json|```/g,'').trim();
+  const m=txt.match(/\{[\s\S]*\}/);if(!m)throw new Error('Uventet svar fra Claude');
+  const obj=JSON.parse(m[0]);
+  const poster=(obj.poster||[]).filter(x=>x&&/^\d\d:\d\d$/.test(x.t)&&x.tekst);
+  poster.forEach(x=>{if(x.sted&&!D.steder.some(s2=>s2.navn===x.sted))x.sted=null;if(x.slutt&&!/^\d\d:\d\d$/.test(x.slutt))x.slutt=null;});
+  return {poster, dato:(/^\d{4}-\d{2}-\d{2}$/.test(obj.dato||'')?obj.dato:'')};
+}
+function stedOptions(valgt){
+  let o='<option value="">-</option>';
+  D.steder.forEach(s=>{o+='<option value="'+escA(s.navn)+'"'+(s.navn===valgt?' selected':'')+'>'+esc(s.navn)+'</option>';});
+  return o;
+}
+function tegnRedigering(){
+  const el=document.getElementById('progRedigering');
+  if(!arbeidsposter.length){el.innerHTML='<div class="sub" style="padding:6px;">Ingen linjer ennaa. Tolk et program eller legg til en linje.</div>';return;}
+  let h='<table class="prog"><tr><th>Tid</th><th>Aktivitet</th><th>Sted</th><th></th></tr>';
+  arbeidsposter.forEach((p,i)=>{
+    h+='<tr><td><div class="tidcell"><input type="time" value="'+(p.t||'')+'" onchange="arbeidsposter['+i+'].t=this.value"><input type="time" value="'+(p.slutt||'')+'" onchange="arbeidsposter['+i+'].slutt=this.value||null"></div></td>'
+      +'<td><input value="'+escA(p.tekst)+'" onchange="arbeidsposter['+i+'].tekst=this.value"></td>'
+      +'<td><select onchange="arbeidsposter['+i+'].sted=this.value||null">'+stedOptions(p.sted)+'</select></td>'
+      +'<td><button class="xknapp" onclick="arbeidsposter.splice('+i+',1);tegnRedigering()">X</button></td></tr>';
+  });
+  h+='</table>';
+  el.innerHTML=h;
+}
+function leggTilRad(){arbeidsposter.push({t:'',slutt:null,tekst:'',sted:null});tegnRedigering();}
+function settPoster(poster){
+  arbeidsposter=(poster||[]).map(p=>({t:p.t||'',slutt:p.slutt||null,tekst:p.tekst||'',sted:p.sted||null}));
+  arbeidsposter.sort((a,b)=>(a.t||'')<(b.t||'')?-1:1);
+  tegnRedigering();
+}
+function lastDagTilRedigering(dato){
+  const eks=D.program[dato];
+  arbeidsposter=eks?eks.map(p=>({t:p.t,slutt:p.slutt||null,tekst:p.tekst,sted:p.sted||null})):[];
+  tegnRedigering();
+}
+async function tolkFraFil(inp){
   const f=inp.files[0];inp.value='';if(!f)return;
-  melding('🤖 Tolker programmet fra bildet…',true);
+  if(!HEMMELIG.ai){melding('⚠️ Bildetolkning krever AI-noekkel',true);return;}
+  melding('🤖 Tolker programmet…',true);
   try{
-    const b64=await skalerBilde(f);
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{
-      'x-api-key':HEMMELIG.ai,'anthropic-version':'2023-06-01','content-type':'application/json',
-      'anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,
-        system:'Du tolker et fotografert/skannet dagsprogram for en norsk familieleir til strukturert JSON. Kjente steder på leiren: '+D.steder.map(s=>s.navn).join(', ')+'. Regler: les ALLE programpunktene i bildet; "t"=starttid HH:MM; "slutt"=sluttid HH:MM eller null; "tekst"=programteksten (uten tidene, ellers ordrett); "sted"=EKSAKT ett av de kjente stedsnavnene hvis posten tydelig hører til der (nevnt i teksten, evt. bøyd form), ellers null; "dato"=datoen som står i programmet som "YYYY-MM-DD" (anta år 2026), eller null hvis ingen dato synes. Svar KUN med gyldig JSON: {"dato":..,"poster":[{"t":"..","slutt":..,"tekst":"..","sted":..}]}',
-        messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Tolk dette dagsprogrammet.'}]}]})});
-    if(res.status===401||res.status===403)throw new Error('Nøkkel avvist – logg inn på nytt');
-    if(!res.ok)throw new Error('Claude-feil ('+res.status+')');
-    const data=await res.json();
-    let txt=((data.content&&data.content[0]&&data.content[0].text)||'').replace(/```json|```/g,'').trim();
-    const m=txt.match(/\{[\s\S]*\}/);if(!m)throw new Error('Uventet svar fra Claude');
-    const obj=JSON.parse(m[0]);
-    const poster=(obj.poster||[]).filter(x=>x&&/^\d\d:\d\d$/.test(x.t)&&x.tekst);
-    poster.forEach(x=>{if(x.sted&&!D.steder.some(s2=>s2.navn===x.sted))x.sted=null;if(x.slutt&&!/^\d\d:\d\d$/.test(x.slutt))x.slutt=null;});
-    if(!poster.length)throw new Error('Fant ingen programposter i bildet – prøv et skarpere bilde');
-    let dato=document.getElementById('pDato').value||(/^\d{4}-\d{2}-\d{2}$/.test(obj.dato||'')?obj.dato:'');
-    if(!dato){melding('⚠️ Fant ingen dato – velg dato øverst og prøv igjen',true);return;}
-    poster.sort((a,b)=>a.t<b.t?-1:1);
-    D.program[dato]=poster;
-    document.getElementById('pDato').value=dato;
-    document.getElementById('pTekst').value=poster.map(x=>x.t+(x.slutt?'–'+x.slutt:'')+' '+x.tekst).join('\n');
-    tegnDager();
-    melding('✅ '+poster.length+' poster tolket fra bildet for '+dato+' ('+poster.filter(x=>x.sted).length+' med sted)');
-    endret();
+    const r=await tolkBildeTilPoster(f);
+    if(!r.poster.length)throw new Error('Fant ingen programposter - proev et skarpere bilde');
+    if(r.dato && !document.getElementById('pDato').value)document.getElementById('pDato').value=r.dato;
+    settPoster(r.poster);
+    melding('✅ '+r.poster.length+' linjer tolket ('+r.poster.filter(p=>p.sted).length+' med sted). Sjekk og lagre.');
   }catch(e){melding('⚠️ '+((e&&e.message)||'Noe gikk galt'),true);}
 }
-async function leggTilDag(){
-  const dato=document.getElementById('pDato').value;
-  const txt=document.getElementById('pTekst').value;
-  if(!dato){alert('Velg dato 🙂');return;}
-  if(!txt.trim()){alert('Lim inn programmet først 🙂');return;}
-  const kn=document.getElementById('dagKnapp');kn.disabled=true;kn.textContent='🤔 Tolker…';
-  let poster=[];
+async function tolkFraTekst(){
+  const txt=document.getElementById('pTekst').value.trim();
+  if(!txt){alert('Lim inn programmet som tekst foerst.');return;}
+  melding('🤖 Tolker teksten…',true);
   try{
+    let poster=[];
     if(HEMMELIG.ai){try{poster=await claudeParse(txt);}catch(e){poster=regexParse(txt);}}
     else poster=regexParse(txt);
-  }finally{kn.disabled=false;kn.textContent='Tolk og legg inn dagen';}
-  if(!poster.length){alert('Fant ingen programposter – sjekk teksten.');return;}
-  poster.sort((a,b)=>a.t<b.t?-1:1);
+    if(!poster.length)throw new Error('Fant ingen programposter i teksten');
+    settPoster(poster);
+    melding('✅ '+poster.length+' linjer tolket ('+poster.filter(p=>p.sted).length+' med sted). Sjekk og lagre.');
+  }catch(e){melding('⚠️ '+e.message,true);}
+}
+async function tolkUtklipp(){
+  melding('📋 Leser utklippstavlen…',true);
+  try{
+    if(navigator.clipboard&&navigator.clipboard.read){
+      try{
+        const items=await navigator.clipboard.read();
+        for(const it of items){
+          const type=it.types.find(t=>t.startsWith('image/'));
+          if(type){
+            if(!HEMMELIG.ai)throw new Error('AI-noekkel mangler');
+            const blob=await it.getType(type);
+            const r=await tolkBildeTilPoster(blob);
+            if(!r.poster.length)throw new Error('Fant ingen programposter i bildet');
+            if(r.dato && !document.getElementById('pDato').value)document.getElementById('pDato').value=r.dato;
+            settPoster(r.poster);
+            melding('✅ '+r.poster.length+' linjer tolket fra utklippsbilde. Sjekk og lagre.');
+            return;
+          }
+        }
+      }catch(e){ if(/AI-noekkel/.test(e.message))throw e; }
+    }
+    const txt=await navigator.clipboard.readText();
+    if(!txt||!txt.trim())throw new Error('Utklippstavlen er tom (eller blokkert - bruk tekstfeltet)');
+    let poster=[];
+    if(HEMMELIG.ai){try{poster=await claudeParse(txt);}catch(e){poster=regexParse(txt);}}
+    else poster=regexParse(txt);
+    if(!poster.length)throw new Error('Fant ingen programposter i teksten');
+    settPoster(poster);
+    melding('✅ '+poster.length+' linjer tolket fra utklippstavlen. Sjekk og lagre.');
+  }catch(e){melding('⚠️ '+e.message,true);}
+}
+function lagreProgram(){
+  const dato=document.getElementById('pDato').value;
+  if(!dato){alert('Velg dato foerst.');return;}
+  const poster=arbeidsposter.filter(p=>p.t&&p.tekst.trim()).map(p=>{
+    const o={t:p.t,tekst:p.tekst.trim()};
+    if(p.slutt)o.slutt=p.slutt;
+    if(p.sted&&D.steder.some(s=>s.navn===p.sted))o.sted=p.sted;
+    return o;
+  }).sort((a,b)=>a.t<b.t?-1:1);
+  if(!poster.length){if(confirm('Ingen gyldige linjer. Slette programmet for '+dato+'?')){delete D.program[dato];tegnDager();endret();}return;}
   D.program[dato]=poster;
-  tegnDager();
-  document.getElementById('pTekst').value='';
-  melding('✅ '+poster.length+' poster for '+dato+' ('+poster.filter(p=>p.sted).length+' med sted)');
-  endret();
+  tegnDager();endret();
+  melding('✅ Program for '+dato+' lagret ('+poster.length+' linjer)');
 }
 function slettDag(d){if(confirm('Slette programmet for '+d+'?')){delete D.program[d];tegnDager();endret();}}
 function tegnDager(){
   const dager=Object.keys(D.program).sort();
-  document.getElementById('dagListe').innerHTML=dager.map(d=>'<div class="rad"><span class="n">'+d+'</span><span class="k">'+D.program[d].length+' poster</span><button onclick="redigerDag(\''+d+'\')">✏️</button><button onclick="slettDag(\''+d+'\')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen dager lagt inn ennå.</div>';
+  document.getElementById('dagListe').innerHTML=dager.map(d=>'<div class="rad"><span class="n">'+d+'</span><span class="k">'+D.program[d].length+' linjer</span><button onclick="redigerDag(\''+d+'\')">✏️</button><button onclick="slettDag(\''+d+'\')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen dager lagt inn ennaa.</div>';
 }
-function redigerDag(d){
-  document.getElementById('pDato').value=d;
-  document.getElementById('pTekst').value=D.program[d].map(p=>p.t+(p.slutt?'–'+p.slutt:'')+' '+p.tekst).join('\n');
-}
+function redigerDag(d){document.getElementById('pDato').value=d;lastDagTilRedigering(d);window.scrollTo(0,0);}
 
 // ---------- Info ----------
 function leggTilInfo(){
@@ -321,6 +406,9 @@ function tegnInfo(){
   document.getElementById('infoListe').innerHTML=D.info.map((x,i)=>'<div class="rad"><span class="n">'+esc(x.tittel)+'</span><button onclick="slettInfo('+i+')">✕</button></div>').join('')||'<div class="sub" style="padding:6px;">Ingen beskjeder.</div>';
 }
 tegnSteder();tegnDager();tegnInfo();
+document.getElementById('pDato').value=new Date().toISOString().slice(0,10);
+document.getElementById('pDato').addEventListener('change',function(){lastDagTilRedigering(this.value);});
+tegnRedigering();
 </script>
 </body>
 </html>
